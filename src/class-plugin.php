@@ -20,6 +20,12 @@ final class Plugin {
 	 * @return void
 	 */
 	public static function load() {
+		$editor_assets = new Editor_Assets();
+		$related_query = new Related_Query();
+
+		$editor_assets->register_hooks();
+		$related_query->register_hooks();
+
 		/**
 		 * Fires after OD Related Query has initialized.
 		 */

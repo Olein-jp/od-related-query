@@ -5,6 +5,7 @@
 	"description": "Development tooling for the OD Related Query WordPress plugin.",
 	"license": "GPL-2.0-or-later",
 	"scripts": {
+		"build": "wp-scripts build",
 		"env:start": "wp-env start",
 		"env:stop": "wp-env stop",
 		"env:status": "wp-env status",
@@ -14,9 +15,21 @@
 		"env:test:start": "wp-env start --config=.wp-env.test.json --auto-port",
 		"env:test:stop": "wp-env stop --config=.wp-env.test.json",
 		"env:test:composer:install": "wp-env run cli --config=.wp-env.test.json --env-cwd=wp-content/plugins/od-related-query composer install",
-		"test:php": "wp-env run cli --config=.wp-env.test.json --env-cwd=wp-content/plugins/od-related-query vendor/bin/phpunit -c phpunit.xml.dist"
+		"lint:js": "wp-scripts lint-js",
+		"start": "wp-scripts start",
+		"test:php": "wp-env run cli --config=.wp-env.test.json --env-cwd=wp-content/plugins/od-related-query vendor/bin/phpunit -c phpunit.xml.dist",
+		"test:unit:js": "wp-scripts test-unit-js"
 	},
 	"devDependencies": {
-		"@wordpress/env": "^11.11.0"
+		"@wordpress/env": "^11.11.0",
+		"@wordpress/scripts": "^33.0.0"
+	},
+	"dependencies": {
+		"@wordpress/blocks": "^15.24.0",
+		"@wordpress/compose": "^8.4.0",
+		"@wordpress/data": "^10.51.0",
+		"@wordpress/element": "^8.3.0",
+		"@wordpress/hooks": "^4.51.0",
+		"@wordpress/i18n": "^6.24.0"
 	}
 }
