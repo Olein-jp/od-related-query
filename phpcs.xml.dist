@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<ruleset name="OD Related Query">
+	<description>WordPress coding standards for OD Related Query.</description>
+
+	<file>od-related-query.php</file>
+	<file>src</file>
+	<file>tests</file>
+
+	<exclude-pattern>*/node_modules/*</exclude-pattern>
+	<exclude-pattern>*/vendor/*</exclude-pattern>
+	<exclude-pattern>*/coverage/*</exclude-pattern>
+
+	<arg name="basepath" value="."/>
+	<arg name="colors"/>
+	<arg value="ps"/>
+
+	<rule ref="WordPress"/>
+
+	<rule ref="WordPress.NamingConventions.PrefixAllGlobals">
+		<properties>
+			<property name="prefixes" type="array">
+				<element value="od_related_query"/>
+			</property>
+		</properties>
+	</rule>
+
+	<rule ref="WordPress.WP.I18n">
+		<properties>
+			<property name="text_domain" type="array">
+				<element value="od-related-query"/>
+			</property>
+		</properties>
+	</rule>
+</ruleset>

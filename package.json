@@ -1,0 +1,22 @@
+{
+	"name": "od-related-query",
+	"version": "0.1.0",
+	"private": true,
+	"description": "Development tooling for the OD Related Query WordPress plugin.",
+	"license": "GPL-2.0-or-later",
+	"scripts": {
+		"env:start": "wp-env start",
+		"env:stop": "wp-env stop",
+		"env:status": "wp-env status",
+		"env:logs": "wp-env logs",
+		"env:cli": "wp-env run cli wp",
+		"env:composer:install": "wp-env run cli --env-cwd=wp-content/plugins/od-related-query composer install",
+		"env:test:start": "wp-env start --config=.wp-env.test.json --auto-port",
+		"env:test:stop": "wp-env stop --config=.wp-env.test.json",
+		"env:test:composer:install": "wp-env run cli --config=.wp-env.test.json --env-cwd=wp-content/plugins/od-related-query composer install",
+		"test:php": "wp-env run cli --config=.wp-env.test.json --env-cwd=wp-content/plugins/od-related-query vendor/bin/phpunit -c phpunit.xml.dist"
+	},
+	"devDependencies": {
+		"@wordpress/env": "^11.11.0"
+	}
+}

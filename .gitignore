@@ -1,0 +1,9 @@
+/node_modules/
+/vendor/
+/.phpstan-cache/
+/.phpunit.result.cache
+/coverage/
+/.wp-env.override.json
+/.wp-env.test.override.json
+.DS_Store
+*.log

@@ -1,0 +1,35 @@
+name: Integration
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  wordpress:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install Node.js dependencies
+        run: npm ci
+
+      - name: Start isolated WordPress test environment
+        run: npm run env:test:start
+
+      - name: Install Composer dependencies in wp-env
+        run: npm run env:test:composer:install
+
+      - name: Run WordPress integration tests
+        run: npm run test:php
