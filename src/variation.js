@@ -3,6 +3,7 @@ import { __ } from '@wordpress/i18n';
 export const VARIATION_NAMESPACE = 'od-related-query/related';
 export const RELATED_POST_PARAMETER = 'od_related_to';
 export const RELATED_PREVIEW_POST_PARAMETER = 'od_related_preview_to';
+export const RELATED_ORDERBY_PARAMETER = 'od_related_orderby';
 export const RELATED_TAXONOMIES_PARAMETER = 'od_related_taxonomies';
 export const RELATED_EXCLUDED_TAXONOMIES_PARAMETER =
 	'od_related_taxonomies_excluded';
@@ -130,6 +131,7 @@ export const RELATED_QUERY_VARIATION = {
 			sticky: '',
 			inherit: false,
 			[ RELATED_POST_PARAMETER ]: 0,
+			[ RELATED_ORDERBY_PARAMETER ]: 'date',
 			[ RELATED_EXCLUDED_TAXONOMIES_PARAMETER ]: [],
 		},
 	},

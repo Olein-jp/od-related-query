@@ -8,6 +8,7 @@
 namespace OD_Related_Query;
 
 use WP_Block;
+use WP_Query;
 use WP_REST_Request;
 
 defined( 'ABSPATH' ) || exit;
@@ -39,6 +40,20 @@ final class Related_Query {
 	const REST_PREVIEW_PARAMETER = 'od_related_preview_to';
 
 	/**
+	 * REST API parameter used to select related-content ordering.
+	 *
+	 * @var string
+	 */
+	const REST_ORDERBY_PARAMETER = 'od_related_orderby';
+
+	/**
+	 * Internal WP_Query variable containing source term-taxonomy IDs.
+	 *
+	 * @var string
+	 */
+	const QUERY_RELEVANCE_TERMS = 'od_related_relevance_terms';
+
+	/**
 	 * REST API parameter used to limit relationship taxonomies.
 	 *
 	 * @var string
@@ -59,6 +74,7 @@ final class Related_Query {
 	 */
 	public function register_hooks() {
 		add_filter( 'query_loop_block_query_vars', array( $this, 'filter_block_query' ), 10, 3 );
+		add_filter( 'posts_clauses', array( $this, 'filter_relevance_clauses' ), 10, 2 );
 		add_action( 'init', array( $this, 'register_rest_filters' ), 100 );
 	}
 
@@ -84,6 +100,7 @@ final class Related_Query {
 		}
 
 		$taxonomies          = $block_query[ self::REST_TAXONOMIES_PARAMETER ] ?? array();
+		$related_orderby     = $block_query[ self::REST_ORDERBY_PARAMETER ] ?? 'date';
 		$excluded_taxonomies = array_key_exists(
 			self::REST_EXCLUDED_TAXONOMIES_PARAMETER,
 			$block_query
@@ -93,7 +110,8 @@ final class Related_Query {
 			$query,
 			get_queried_object_id(),
 			is_array( $taxonomies ) ? $taxonomies : array(),
-			is_array( $excluded_taxonomies ) ? $excluded_taxonomies : null
+			is_array( $excluded_taxonomies ) ? $excluded_taxonomies : null,
+			is_string( $related_orderby ) ? $related_orderby : 'date'
 		);
 	}
 
@@ -143,6 +161,12 @@ final class Related_Query {
 			'minimum'           => 0,
 			'sanitize_callback' => 'absint',
 		);
+		$query_params[ self::REST_ORDERBY_PARAMETER ]             = array(
+			'description'       => __( 'Ordering used for related content.', 'od-related-query' ),
+			'type'              => 'string',
+			'enum'              => array( 'date', 'relevance' ),
+			'sanitize_callback' => 'sanitize_key',
+		);
 		$query_params[ self::REST_TAXONOMIES_PARAMETER ]          = array(
 			'description' => __( 'Taxonomies used to determine related content.', 'od-related-query' ),
 			'type'        => 'array',
@@ -175,6 +199,7 @@ final class Related_Query {
 
 		$post_id             = absint( $request->get_param( self::REST_PARAMETER ) );
 		$preview_post_id     = absint( $request->get_param( self::REST_PREVIEW_PARAMETER ) );
+		$related_orderby     = $request->get_param( self::REST_ORDERBY_PARAMETER );
 		$taxonomies          = $request->get_param( self::REST_TAXONOMIES_PARAMETER );
 		$excluded_taxonomies = $request->has_param(
 			self::REST_EXCLUDED_TAXONOMIES_PARAMETER
@@ -184,7 +209,8 @@ final class Related_Query {
 			$args,
 			$post_id ? $post_id : $preview_post_id,
 			is_array( $taxonomies ) ? $taxonomies : array(),
-			is_array( $excluded_taxonomies ) ? $excluded_taxonomies : null
+			is_array( $excluded_taxonomies ) ? $excluded_taxonomies : null,
+			is_string( $related_orderby ) ? $related_orderby : 'date'
 		);
 	}
 
@@ -195,13 +221,15 @@ final class Related_Query {
 	 * @param int                     $post_id               Source post ID.
 	 * @param array<int, string>      $selected_taxonomies  Legacy taxonomies used for matching.
 	 * @param array<int, string>|null $excluded_taxonomies Taxonomies explicitly excluded from matching.
+	 * @param string                  $related_orderby     Related-content ordering mode.
 	 * @return array<string, mixed>
 	 */
 	public function apply_related_arguments(
 		$query,
 		$post_id,
 		$selected_taxonomies = array(),
-		$excluded_taxonomies = null
+		$excluded_taxonomies = null,
+		$related_orderby = 'date'
 	) {
 		$post = get_post( $post_id );
 
@@ -230,6 +258,7 @@ final class Related_Query {
 		$tax_query           = array( 'relation' => 'OR' );
 		$taxonomies          = get_object_taxonomies( $post->post_type, 'objects' );
 		$target_taxonomies   = get_object_taxonomies( $query['post_type'], 'names' );
+		$relevance_term_ids  = array();
 		$selected_taxonomies = array_filter(
 			array_map( 'sanitize_key', $selected_taxonomies )
 		);
@@ -256,17 +285,21 @@ final class Related_Query {
 				continue;
 			}
 
-			$term_ids = wp_get_post_terms(
+			$terms = wp_get_post_terms(
 				$post_id,
-				$taxonomy->name,
-				array( 'fields' => 'ids' )
+				$taxonomy->name
 			);
 
-			if ( is_wp_error( $term_ids ) || empty( $term_ids ) ) {
+			if ( is_wp_error( $terms ) || empty( $terms ) ) {
 				continue;
 			}
 
-			$tax_query[] = array(
+			$term_ids           = wp_list_pluck( $terms, 'term_id' );
+			$relevance_term_ids = array_merge(
+				$relevance_term_ids,
+				wp_list_pluck( $terms, 'term_taxonomy_id' )
+			);
+			$tax_query[]        = array(
 				'taxonomy' => $taxonomy->name,
 				'field'    => 'term_id',
 				'terms'    => array_map( 'absint', $term_ids ),
@@ -282,7 +315,59 @@ final class Related_Query {
 		unset( $query['post__in'] );
 		// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query -- Taxonomy matching is the plugin's core behavior.
 		$query['tax_query'] = $tax_query;
+		if ( 'relevance' === sanitize_key( $related_orderby ) ) {
+			$query[ self::QUERY_RELEVANCE_TERMS ] = array_values(
+				array_unique( array_map( 'absint', $relevance_term_ids ) )
+			);
+		} else {
+			unset( $query[ self::QUERY_RELEVANCE_TERMS ] );
+		}
 
 		return $query;
+	}
+
+	/**
+	 * Orders marked related-content queries by their shared term count.
+	 *
+	 * @param array<string, string> $clauses Query SQL clauses.
+	 * @param WP_Query              $query   Query instance.
+	 * @return array<string, string>
+	 */
+	public function filter_relevance_clauses( $clauses, $query ) {
+		global $wpdb;
+
+		$term_taxonomy_ids = wp_parse_id_list(
+			$query->get( self::QUERY_RELEVANCE_TERMS )
+		);
+
+		if ( empty( $term_taxonomy_ids ) ) {
+			return $clauses;
+		}
+
+		$placeholders = implode(
+			', ',
+			array_fill( 0, count( $term_taxonomy_ids ), '%d' )
+		);
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- The placeholder list is generated from validated IDs and every value is passed to prepare().
+		$score_query = $wpdb->prepare(
+			"SELECT object_id, COUNT(DISTINCT term_taxonomy_id) AS shared_term_count
+			FROM {$wpdb->term_relationships}
+			WHERE term_taxonomy_id IN ({$placeholders})
+			GROUP BY object_id",
+			$term_taxonomy_ids
+		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+
+		if ( ! is_string( $score_query ) ) {
+			return $clauses;
+		}
+
+		$clauses['join']   .= " INNER JOIN ({$score_query}) AS od_related_score
+			ON {$wpdb->posts}.ID = od_related_score.object_id";
+		$clauses['orderby'] = "od_related_score.shared_term_count DESC,
+			{$wpdb->posts}.post_date DESC,
+			{$wpdb->posts}.ID DESC";
+
+		return $clauses;
 	}
 }

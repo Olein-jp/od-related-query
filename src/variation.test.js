@@ -4,6 +4,7 @@ import {
 	getSelectedTaxonomySlugs,
 	getTaxonomySourcePostType,
 	RELATED_EXCLUDED_TAXONOMIES_PARAMETER,
+	RELATED_ORDERBY_PARAMETER,
 	RELATED_POST_PARAMETER,
 	RELATED_QUERY_VARIATION,
 	RELATED_TAXONOMIES_PARAMETER,
@@ -21,6 +22,7 @@ describe( 'related Query Loop variation', () => {
 			postType: 'post',
 			inherit: false,
 			[ RELATED_POST_PARAMETER ]: 0,
+			[ RELATED_ORDERBY_PARAMETER ]: 'date',
 			[ RELATED_EXCLUDED_TAXONOMIES_PARAMETER ]: [],
 		} );
 		expect( RELATED_QUERY_VARIATION.allowedControls ).toEqual( [

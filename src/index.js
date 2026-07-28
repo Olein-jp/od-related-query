@@ -19,6 +19,7 @@ import {
 	getSelectedTaxonomySlugs,
 	getTaxonomySourcePostType,
 	RELATED_EXCLUDED_TAXONOMIES_PARAMETER,
+	RELATED_ORDERBY_PARAMETER,
 	RELATED_POST_PARAMETER,
 	RELATED_PREVIEW_POST_PARAMETER,
 	RELATED_QUERY_VARIATION,
@@ -322,6 +323,15 @@ function RelatedQueryBlockEdit( { BlockEdit, ...props } ) {
 		} );
 	};
 
+	const setRelatedOrderBy = ( relatedOrderBy ) => {
+		setAttributes( {
+			query: {
+				...query,
+				[ RELATED_ORDERBY_PARAMETER ]: relatedOrderBy,
+			},
+		} );
+	};
+
 	const setTaxonomySelected = ( taxonomySlug, isSelected ) => {
 		const nextTaxonomies = isSelected
 			? [ ...selectedTaxonomies, taxonomySlug ]
@@ -362,6 +372,28 @@ function RelatedQueryBlockEdit( { BlockEdit, ...props } ) {
 						'od-related-query'
 					)
 				),
+				createElement( SelectControl, {
+					label: __( 'Related content order', 'od-related-query' ),
+					help: __(
+						'Relevance counts shared terms. Ties use newest content first.',
+						'od-related-query'
+					),
+					value:
+						'relevance' === query[ RELATED_ORDERBY_PARAMETER ]
+							? 'relevance'
+							: 'date',
+					options: [
+						{
+							label: __( 'Date', 'od-related-query' ),
+							value: 'date',
+						},
+						{
+							label: __( 'Relevance', 'od-related-query' ),
+							value: 'relevance',
+						},
+					],
+					onChange: setRelatedOrderBy,
+				} ),
 				isTemplateEditor &&
 					previewSourceContext.isLoading &&
 					createElement(

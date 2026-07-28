@@ -268,6 +268,203 @@ class Related_Query_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Relevance ordering prioritizes shared terms and has deterministic ties.
+	 *
+	 * @return void
+	 */
+	public function test_relevance_order_uses_shared_term_count_and_stable_ties() {
+		$term_ids  = array(
+			self::factory()->term->create(
+				array(
+					'taxonomy' => 'category',
+				)
+			),
+			self::factory()->term->create(
+				array(
+					'taxonomy' => 'category',
+				)
+			),
+			self::factory()->term->create(
+				array(
+					'taxonomy' => 'category',
+				)
+			),
+		);
+		$source_id = self::factory()->post->create();
+		$high_id   = self::factory()->post->create(
+			array(
+				'post_date' => '2024-01-01 00:00:00',
+			)
+		);
+		$tie_one   = self::factory()->post->create(
+			array(
+				'post_date' => '2024-02-01 00:00:00',
+			)
+		);
+		$tie_two   = self::factory()->post->create(
+			array(
+				'post_date' => '2024-02-01 00:00:00',
+			)
+		);
+
+		wp_set_post_terms( $source_id, $term_ids, 'category' );
+		wp_set_post_terms( $high_id, $term_ids, 'category' );
+		wp_set_post_terms( $tie_one, array( $term_ids[0] ), 'category' );
+		wp_set_post_terms( $tie_two, array( $term_ids[0] ), 'category' );
+
+		$related_query = new Related_Query();
+		$args          = $related_query->apply_related_arguments(
+			array(
+				'fields'         => 'ids',
+				'post_type'      => 'post',
+				'posts_per_page' => 10,
+			),
+			$source_id,
+			array( 'category' ),
+			null,
+			'relevance'
+		);
+		$query         = new WP_Query( $args );
+
+		$this->assertSame(
+			array( $high_id, max( $tie_one, $tie_two ), min( $tie_one, $tie_two ) ),
+			$query->posts
+		);
+
+		$request = new WP_REST_Request( 'GET', '/wp/v2/posts' );
+		$request->set_param( Related_Query::REST_PARAMETER, $source_id );
+		$request->set_param( Related_Query::REST_ORDERBY_PARAMETER, 'relevance' );
+		$request->set_param(
+			Related_Query::REST_TAXONOMIES_PARAMETER,
+			array( 'category' )
+		);
+		$request->set_param( 'per_page', 10 );
+
+		$response = rest_do_request( $request );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame(
+			$query->posts,
+			wp_list_pluck( $response->get_data(), 'id' )
+		);
+	}
+
+	/**
+	 * Relevance scoring counts terms from selected taxonomies only.
+	 *
+	 * @return void
+	 */
+	public function test_relevance_order_scores_only_selected_taxonomies() {
+		$category_id = self::factory()->term->create(
+			array(
+				'taxonomy' => 'category',
+			)
+		);
+		$topic_ids   = array(
+			self::factory()->term->create(
+				array(
+					'taxonomy' => self::TAXONOMY,
+				)
+			),
+			self::factory()->term->create(
+				array(
+					'taxonomy' => self::TAXONOMY,
+				)
+			),
+		);
+		$source_id   = self::factory()->post->create();
+		$older_id    = self::factory()->post->create(
+			array(
+				'post_date' => '2024-01-01 00:00:00',
+			)
+		);
+		$newer_id    = self::factory()->post->create(
+			array(
+				'post_date' => '2024-02-01 00:00:00',
+			)
+		);
+
+		wp_set_post_terms( $source_id, array( $category_id ), 'category' );
+		wp_set_post_terms( $source_id, $topic_ids, self::TAXONOMY );
+		wp_set_post_terms( $older_id, array( $category_id ), 'category' );
+		wp_set_post_terms( $older_id, $topic_ids, self::TAXONOMY );
+		wp_set_post_terms( $newer_id, array( $category_id ), 'category' );
+
+		$related_query = new Related_Query();
+		$args          = $related_query->apply_related_arguments(
+			array(
+				'fields'         => 'ids',
+				'post_type'      => 'post',
+				'posts_per_page' => 10,
+			),
+			$source_id,
+			array( 'category' ),
+			null,
+			'relevance'
+		);
+		$query         = new WP_Query( $args );
+
+		$this->assertSame( array( $newer_id, $older_id ), $query->posts );
+	}
+
+	/**
+	 * Date ordering remains the default and can be selected explicitly.
+	 *
+	 * @return void
+	 */
+	public function test_date_order_remains_available() {
+		$term_ids  = array(
+			self::factory()->term->create(
+				array(
+					'taxonomy' => 'category',
+				)
+			),
+			self::factory()->term->create(
+				array(
+					'taxonomy' => 'category',
+				)
+			),
+		);
+		$source_id = self::factory()->post->create();
+		$older_id  = self::factory()->post->create(
+			array(
+				'post_date' => '2024-01-01 00:00:00',
+			)
+		);
+		$newer_id  = self::factory()->post->create(
+			array(
+				'post_date' => '2024-02-01 00:00:00',
+			)
+		);
+
+		wp_set_post_terms( $source_id, $term_ids, 'category' );
+		wp_set_post_terms( $older_id, $term_ids, 'category' );
+		wp_set_post_terms( $newer_id, array( $term_ids[0] ), 'category' );
+
+		$related_query = new Related_Query();
+		$args          = $related_query->apply_related_arguments(
+			array(
+				'fields'         => 'ids',
+				'order'          => 'DESC',
+				'orderby'        => 'date',
+				'post_type'      => 'post',
+				'posts_per_page' => 10,
+			),
+			$source_id,
+			array( 'category' ),
+			null,
+			'date'
+		);
+		$query         = new WP_Query( $args );
+
+		$this->assertSame( array( $newer_id, $older_id ), $query->posts );
+		$this->assertArrayNotHasKey(
+			Related_Query::QUERY_RELEVANCE_TERMS,
+			$args
+		);
+	}
+
+	/**
 	 * Selected taxonomies limit which shared terms count as related.
 	 *
 	 * @return void
