@@ -229,6 +229,7 @@ final class Related_Query {
 
 		$tax_query           = array( 'relation' => 'OR' );
 		$taxonomies          = get_object_taxonomies( $post->post_type, 'objects' );
+		$target_taxonomies   = get_object_taxonomies( $query['post_type'], 'names' );
 		$selected_taxonomies = array_filter(
 			array_map( 'sanitize_key', $selected_taxonomies )
 		);
@@ -241,6 +242,7 @@ final class Related_Query {
 		foreach ( $taxonomies as $taxonomy ) {
 			if (
 				! is_taxonomy_viewable( $taxonomy )
+				|| ! in_array( $taxonomy->name, $target_taxonomies, true )
 				|| (
 					is_array( $excluded_taxonomies )
 					&& in_array( $taxonomy->name, $excluded_taxonomies, true )

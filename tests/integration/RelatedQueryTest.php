@@ -177,6 +177,97 @@ class Related_Query_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Cross-post-type queries use only public taxonomies shared by both types.
+	 *
+	 * @return void
+	 */
+	public function test_cross_post_type_query_uses_only_shared_taxonomies() {
+		register_post_type(
+			'od_related_item',
+			array(
+				'public' => true,
+			)
+		);
+		register_taxonomy_for_object_type( self::TAXONOMY, 'od_related_item' );
+
+		$category_id = self::factory()->term->create(
+			array(
+				'taxonomy' => 'category',
+			)
+		);
+		$topic_id    = self::factory()->term->create(
+			array(
+				'taxonomy' => self::TAXONOMY,
+			)
+		);
+		$source_id   = self::factory()->post->create();
+		$match_id    = self::factory()->post->create(
+			array(
+				'post_type' => 'od_related_item',
+			)
+		);
+
+		wp_set_post_terms( $source_id, array( $category_id ), 'category' );
+		wp_set_post_terms( $source_id, array( $topic_id ), self::TAXONOMY );
+		wp_set_post_terms( $match_id, array( $topic_id ), self::TAXONOMY );
+
+		$related_query = new Related_Query();
+		$args          = $related_query->apply_related_arguments(
+			array(
+				'fields'    => 'ids',
+				'post_type' => 'od_related_item',
+			),
+			$source_id,
+			array(),
+			array( 'invalid_saved_taxonomy' )
+		);
+
+		$this->assertCount( 2, $args['tax_query'] );
+		$this->assertSame( self::TAXONOMY, $args['tax_query'][0]['taxonomy'] );
+		$this->assertSame( array( $match_id ), get_posts( $args ) );
+	}
+
+	/**
+	 * Cross-post-type queries without a shared taxonomy return no results.
+	 *
+	 * @return void
+	 */
+	public function test_cross_post_type_query_without_shared_taxonomy_returns_no_results() {
+		register_post_type(
+			'od_related_item',
+			array(
+				'public' => true,
+			)
+		);
+
+		$category_id = self::factory()->term->create(
+			array(
+				'taxonomy' => 'category',
+			)
+		);
+		$source_id   = self::factory()->post->create();
+		self::factory()->post->create(
+			array(
+				'post_type' => 'od_related_item',
+			)
+		);
+
+		wp_set_post_terms( $source_id, array( $category_id ), 'category' );
+
+		$related_query = new Related_Query();
+		$args          = $related_query->apply_related_arguments(
+			array(
+				'fields'    => 'ids',
+				'post_type' => 'od_related_item',
+			),
+			$source_id
+		);
+
+		$this->assertSame( array( 0 ), $args['post__in'] );
+		$this->assertSame( array(), get_posts( $args ) );
+	}
+
+	/**
 	 * Selected taxonomies limit which shared terms count as related.
 	 *
 	 * @return void

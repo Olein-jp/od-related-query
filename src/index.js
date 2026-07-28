@@ -28,6 +28,27 @@ import {
 
 registerBlockVariation( 'core/query', RELATED_QUERY_VARIATION );
 
+function getNoTaxonomiesMessage( sourcePostType, targetPostType ) {
+	if ( ! sourcePostType ) {
+		return __(
+			'Select a post type in the Query settings to load its taxonomies.',
+			'od-related-query'
+		);
+	}
+
+	if ( sourcePostType !== targetPostType ) {
+		return __(
+			'The source and target post types do not share any public taxonomies. Related content cannot be determined for this combination.',
+			'od-related-query'
+		);
+	}
+
+	return __(
+		'No public taxonomies are available for the selected post type.',
+		'od-related-query'
+	);
+}
+
 function RelatedQueryBlockEdit( { BlockEdit, ...props } ) {
 	const { attributes, setAttributes } = props;
 	const { query = {} } = attributes;
@@ -43,37 +64,68 @@ function RelatedQueryBlockEdit( { BlockEdit, ...props } ) {
 		editorContext.postType,
 		query.postType
 	);
+	const taxonomyTargetPostType =
+		'string' === typeof query.postType &&
+		query.postType &&
+		! query.postType.startsWith( 'wp_' )
+			? query.postType
+			: taxonomySourcePostType;
 	const isTemplateEditor = 'wp_template' === editorContext.postType;
 	const taxonomyContext = useSelect(
 		( select ) => {
-			if ( ! taxonomySourcePostType ) {
+			if ( ! taxonomySourcePostType || ! taxonomyTargetPostType ) {
 				return {
 					error: null,
 					isLoading: false,
-					taxonomies: [],
+					sourceTaxonomies: [],
+					targetTaxonomies: [],
 				};
 			}
 
 			const core = select( 'core' );
-			const taxonomyQuery = {
+			const sourceQuery = {
 				type: taxonomySourcePostType,
 				per_page: -1,
 			};
-			const resolutionArgs = [ taxonomyQuery ];
+			const targetQuery = {
+				type: taxonomyTargetPostType,
+				per_page: -1,
+			};
+			const sourceResolutionArgs = [ sourceQuery ];
+			const targetResolutionArgs = [ targetQuery ];
+			const sourceTaxonomies = core.getTaxonomies( sourceQuery );
+			const targetTaxonomies =
+				taxonomySourcePostType === taxonomyTargetPostType
+					? sourceTaxonomies
+					: core.getTaxonomies( targetQuery );
 
 			return {
-				error: core.getResolutionError(
-					'getTaxonomies',
-					resolutionArgs
-				),
-				isLoading: ! core.hasFinishedResolution(
-					'getTaxonomies',
-					resolutionArgs
-				),
-				taxonomies: core.getTaxonomies( taxonomyQuery ),
+				error:
+					core.getResolutionError(
+						'getTaxonomies',
+						sourceResolutionArgs
+					) ||
+					( taxonomySourcePostType !== taxonomyTargetPostType
+						? core.getResolutionError(
+								'getTaxonomies',
+								targetResolutionArgs
+						  )
+						: null ),
+				isLoading:
+					! core.hasFinishedResolution(
+						'getTaxonomies',
+						sourceResolutionArgs
+					) ||
+					( taxonomySourcePostType !== taxonomyTargetPostType &&
+						! core.hasFinishedResolution(
+							'getTaxonomies',
+							targetResolutionArgs
+						) ),
+				sourceTaxonomies,
+				targetTaxonomies,
 			};
 		},
-		[ taxonomySourcePostType ]
+		[ taxonomySourcePostType, taxonomyTargetPostType ]
 	);
 	const previewSourceContext = useSelect(
 		( select ) => {
@@ -124,11 +176,23 @@ function RelatedQueryBlockEdit( { BlockEdit, ...props } ) {
 		0 < sourcePostId &&
 		'string' === typeof editorContext.postType &&
 		! editorContext.postType.startsWith( 'wp_' );
-	const availableTaxonomies = Array.isArray( taxonomyContext.taxonomies )
-		? taxonomyContext.taxonomies.filter(
+	const sourceTaxonomies = Array.isArray( taxonomyContext.sourceTaxonomies )
+		? taxonomyContext.sourceTaxonomies.filter(
 				( taxonomy ) => false !== taxonomy.visibility?.public
 		  )
 		: [];
+	const targetTaxonomySlugs = new Set(
+		Array.isArray( taxonomyContext.targetTaxonomies )
+			? taxonomyContext.targetTaxonomies
+					.filter(
+						( taxonomy ) => false !== taxonomy.visibility?.public
+					)
+					.map( ( taxonomy ) => taxonomy.slug )
+			: []
+	);
+	const availableTaxonomies = sourceTaxonomies.filter( ( taxonomy ) =>
+		targetTaxonomySlugs.has( taxonomy.slug )
+	);
 	const selectedTaxonomies = getSelectedTaxonomySlugs(
 		availableTaxonomies,
 		query
@@ -199,6 +263,54 @@ function RelatedQueryBlockEdit( { BlockEdit, ...props } ) {
 		previewSourceContext.posts,
 		query,
 		setAttributes,
+	] );
+
+	useEffect( () => {
+		if ( taxonomyContext.isLoading || taxonomyContext.error ) {
+			return;
+		}
+
+		const availableSlugs = new Set(
+			availableTaxonomies.map( ( taxonomy ) => taxonomy.slug )
+		);
+		const settingKeys = [
+			RELATED_EXCLUDED_TAXONOMIES_PARAMETER,
+			RELATED_TAXONOMIES_PARAMETER,
+		];
+		const settingKey = settingKeys.find( ( key ) =>
+			Array.isArray( query[ key ] )
+		);
+
+		if ( ! settingKey ) {
+			return;
+		}
+
+		const storedTaxonomies = query[ settingKey ];
+		const validTaxonomies = storedTaxonomies.filter( ( slug ) =>
+			availableSlugs.has( slug )
+		);
+
+		if (
+			validTaxonomies.length === storedTaxonomies.length &&
+			validTaxonomies.every(
+				( slug, index ) => slug === storedTaxonomies[ index ]
+			)
+		) {
+			return;
+		}
+
+		setAttributes( {
+			query: {
+				...query,
+				[ settingKey ]: validTaxonomies,
+			},
+		} );
+	}, [
+		availableTaxonomies,
+		query,
+		setAttributes,
+		taxonomyContext.error,
+		taxonomyContext.isLoading,
 	] );
 
 	const setPreviewSourcePost = ( previewPostId ) => {
@@ -351,15 +463,10 @@ function RelatedQueryBlockEdit( { BlockEdit, ...props } ) {
 							status: 'info',
 							isDismissible: false,
 						},
-						taxonomySourcePostType
-							? __(
-									'No public taxonomies are available for the selected post type.',
-									'od-related-query'
-							  )
-							: __(
-									'Select a post type in the Query settings to load its taxonomies.',
-									'od-related-query'
-							  )
+						getNoTaxonomiesMessage(
+							taxonomySourcePostType,
+							taxonomyTargetPostType
+						)
 					),
 				! taxonomyContext.isLoading &&
 					! taxonomyContext.error &&
