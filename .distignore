@@ -16,6 +16,7 @@
 /phpcs.xml.dist
 /phpstan.neon.dist
 /phpunit.xml.dist
+/scripts
 /src/*.js
 /tests
 /vendor

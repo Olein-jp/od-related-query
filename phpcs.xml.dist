@@ -3,6 +3,7 @@
 	<description>WordPress coding standards for OD Related Query.</description>
 
 	<file>od-related-query.php</file>
+	<file>scripts</file>
 	<file>src</file>
 	<file>tests</file>
 

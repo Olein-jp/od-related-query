@@ -45,16 +45,20 @@ final class Related_Query {
 	 * Adds related-content arguments to this plugin's Query Loop variation.
 	 *
 	 * @param array<string, mixed> $query Query arguments.
-	 * @param WP_Block             $block Query block instance.
+	 * @param WP_Block             $block Block instance used to build the query.
 	 * @param int                  $page  Current query page.
 	 * @return array<string, mixed>
 	 */
 	public function filter_block_query( $query, $block, $page ) {
 		unset( $page );
 
-		$namespace = $block->parsed_block['attrs']['namespace'] ?? '';
+		$block_query = $block->context['query'] ?? array();
 
-		if ( self::VARIATION_NAMESPACE !== $namespace || ! is_singular() ) {
+		if (
+			! is_array( $block_query )
+			|| ! array_key_exists( self::REST_PARAMETER, $block_query )
+			|| ! is_singular()
+		) {
 			return $query;
 		}
 

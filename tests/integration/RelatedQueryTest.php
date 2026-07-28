@@ -77,11 +77,14 @@ class Related_Query_Test extends WP_UnitTestCase {
 
 		$block = new WP_Block(
 			array(
-				'blockName'   => 'core/query',
-				'attrs'       => array(
-					'namespace' => Related_Query::VARIATION_NAMESPACE,
-				),
+				'blockName'   => 'core/post-template',
+				'attrs'       => array(),
 				'innerBlocks' => array(),
+			),
+			array(
+				'query' => array(
+					Related_Query::REST_PARAMETER => 0,
+				),
 			)
 		);
 		$args  = apply_filters(
@@ -137,11 +140,14 @@ class Related_Query_Test extends WP_UnitTestCase {
 
 		$block = new WP_Block(
 			array(
-				'blockName'   => 'core/query',
-				'attrs'       => array(
-					'namespace' => 'another-plugin/query',
-				),
+				'blockName'   => 'core/post-template',
+				'attrs'       => array(),
 				'innerBlocks' => array(),
+			),
+			array(
+				'query' => array(
+					'perPage' => 3,
+				),
 			)
 		);
 		$args  = array(

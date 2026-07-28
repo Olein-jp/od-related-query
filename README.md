@@ -21,7 +21,16 @@ composer install
 npm install
 npm run build
 npm run env:start
+npm run env:seed
 ```
+
+`npm run env:start` automatically selects available ports and prints the local
+WordPress URLs after startup.
+
+`npm run env:seed` creates or updates 20 sample posts, four categories, eight
+tags, and generated featured images. It also adds the Related Content variation
+once to the active block theme's single-post template. Existing customized
+single templates are preserved.
 
 Quality checks:
 
