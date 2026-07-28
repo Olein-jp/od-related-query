@@ -45,9 +45,9 @@ final class Sample_Content_Seeder {
 			'category',
 			array(
 				'wordpress'          => 'WordPress',
-				'plugin-development' => 'プラグイン開発',
-				'block-themes'       => 'ブロックテーマ',
-				'performance'        => 'パフォーマンス',
+				'plugin-development' => __( 'Plugin Development', 'od-related-query' ),
+				'block-themes'       => __( 'Block Themes', 'od-related-query' ),
+				'performance'        => __( 'Performance', 'od-related-query' ),
 			)
 		);
 		$tags       = $this->ensure_terms(
@@ -189,102 +189,102 @@ final class Sample_Content_Seeder {
 	private function get_post_definitions() {
 		return array(
 			array(
-				'title'      => 'Query Loop ブロックの基本を理解する',
+				'title'      => __( 'Understanding the Query Loop block', 'od-related-query' ),
 				'categories' => array( 'wordpress', 'block-themes' ),
 				'tags'       => array( 'gutenberg', 'query-loop' ),
 			),
 			array(
-				'title'      => '関連記事プラグインの設計メモ',
+				'title'      => __( 'Design notes for a related-content plugin', 'od-related-query' ),
 				'categories' => array( 'plugin-development', 'wordpress' ),
 				'tags'       => array( 'query-loop', 'taxonomy', 'php' ),
 			),
 			array(
-				'title'      => 'カテゴリーを使った投稿の分類方法',
+				'title'      => __( 'Organizing posts with categories', 'od-related-query' ),
 				'categories' => array( 'wordpress' ),
 				'tags'       => array( 'taxonomy', 'gutenberg' ),
 			),
 			array(
-				'title'      => 'タグを活用して記事を横断的につなぐ',
+				'title'      => __( 'Connecting content across the site with tags', 'od-related-query' ),
 				'categories' => array( 'wordpress' ),
 				'tags'       => array( 'taxonomy', 'query-loop' ),
 			),
 			array(
-				'title'      => 'ブロックテーマで個別投稿テンプレートを編集する',
+				'title'      => __( 'Editing single-post templates in block themes', 'od-related-query' ),
 				'categories' => array( 'block-themes' ),
 				'tags'       => array( 'gutenberg', 'theme-json' ),
 			),
 			array(
-				'title'      => 'theme.json で投稿カードを整える',
+				'title'      => __( 'Styling post cards with theme.json', 'od-related-query' ),
 				'categories' => array( 'block-themes' ),
 				'tags'       => array( 'theme-json', 'gutenberg' ),
 			),
 			array(
-				'title'      => 'WordPress プラグインのフック設計',
+				'title'      => __( 'Designing hooks for WordPress plugins', 'od-related-query' ),
 				'categories' => array( 'plugin-development' ),
 				'tags'       => array( 'php', 'testing' ),
 			),
 			array(
-				'title'      => 'Block Variation API の使いどころ',
+				'title'      => __( 'When to use the Block Variation API', 'od-related-query' ),
 				'categories' => array( 'plugin-development', 'block-themes' ),
 				'tags'       => array( 'javascript', 'gutenberg' ),
 			),
 			array(
-				'title'      => 'WP_Query と tax_query の基礎',
+				'title'      => __( 'The basics of WP_Query and tax_query', 'od-related-query' ),
 				'categories' => array( 'plugin-development' ),
 				'tags'       => array( 'php', 'taxonomy' ),
 			),
 			array(
-				'title'      => 'REST API でエディタープレビューを揃える',
+				'title'      => __( 'Keeping editor previews consistent with the REST API', 'od-related-query' ),
 				'categories' => array( 'plugin-development' ),
 				'tags'       => array( 'javascript', 'testing' ),
 			),
 			array(
-				'title'      => 'WP-CLI で開発用コンテンツを準備する',
+				'title'      => __( 'Preparing development content with WP-CLI', 'od-related-query' ),
 				'categories' => array( 'plugin-development' ),
 				'tags'       => array( 'wp-cli', 'testing' ),
 			),
 			array(
-				'title'      => 'PHPUnit で WordPress 統合テストを書く',
+				'title'      => __( 'Writing WordPress integration tests with PHPUnit', 'od-related-query' ),
 				'categories' => array( 'plugin-development' ),
 				'tags'       => array( 'php', 'testing' ),
 			),
 			array(
-				'title'      => 'JavaScript でブロック拡張をテストする',
+				'title'      => __( 'Testing block extensions with JavaScript', 'od-related-query' ),
 				'categories' => array( 'plugin-development' ),
 				'tags'       => array( 'javascript', 'testing' ),
 			),
 			array(
-				'title'      => 'Query Loop の表示件数と並び順を考える',
+				'title'      => __( 'Choosing the Query Loop item count and order', 'od-related-query' ),
 				'categories' => array( 'block-themes', 'performance' ),
 				'tags'       => array( 'query-loop', 'gutenberg' ),
 			),
 			array(
-				'title'      => 'タクソノミークエリの負荷を確認する',
+				'title'      => __( 'Measuring taxonomy query load', 'od-related-query' ),
 				'categories' => array( 'performance', 'plugin-development' ),
 				'tags'       => array( 'taxonomy', 'php' ),
 			),
 			array(
-				'title'      => '関連記事をキャッシュする前に測ること',
+				'title'      => __( 'What to measure before caching related content', 'od-related-query' ),
 				'categories' => array( 'performance' ),
 				'tags'       => array( 'query-loop', 'testing' ),
 			),
 			array(
-				'title'      => 'ブロックエディターのアセットを軽量化する',
+				'title'      => __( 'Reducing block editor asset size', 'od-related-query' ),
 				'categories' => array( 'performance', 'block-themes' ),
 				'tags'       => array( 'javascript', 'gutenberg' ),
 			),
 			array(
-				'title'      => 'カスタムタクソノミー拡張への準備',
+				'title'      => __( 'Preparing for custom taxonomy extensions', 'od-related-query' ),
 				'categories' => array( 'plugin-development', 'wordpress' ),
 				'tags'       => array( 'taxonomy', 'php' ),
 			),
 			array(
-				'title'      => 'サイトエディターでカードレイアウトを調整する',
+				'title'      => __( 'Adjusting card layouts in the Site Editor', 'od-related-query' ),
 				'categories' => array( 'block-themes', 'wordpress' ),
 				'tags'       => array( 'theme-json', 'query-loop' ),
 			),
 			array(
-				'title'      => '関連記事表示の確認チェックリスト',
+				'title'      => __( 'Related-content display checklist', 'od-related-query' ),
 				'categories' => array( 'wordpress', 'performance' ),
 				'tags'       => array( 'testing', 'query-loop', 'wp-cli' ),
 			),
@@ -303,12 +303,12 @@ final class Sample_Content_Seeder {
 			esc_html(
 				sprintf(
 					/* translators: %s: sample post title. */
-					__( '「%s」の表示確認に使用するサンプル投稿です。', 'od-related-query' ),
+					__( 'This sample post is used to preview “%s”.', 'od-related-query' ),
 					$title
 				)
 			),
-			esc_html__( '確認ポイント', 'od-related-query' ),
-			esc_html__( 'カテゴリーやタグが共通する投稿が、個別投稿テンプレートの関連記事セクションに表示されることを確認してください。', 'od-related-query' )
+			esc_html__( 'What to check', 'od-related-query' ),
+			esc_html__( 'Confirm that posts sharing categories or tags appear in the related-content section of the single-post template.', 'od-related-query' )
 		);
 	}
 
@@ -486,10 +486,10 @@ final class Sample_Content_Seeder {
 	 * @return string
 	 */
 	private function get_related_template_section() {
-		return <<<'HTML'
+		$template = <<<'HTML'
 <!-- wp:group {"tagName":"section","metadata":{"name":"OD Related Query Sample"},"layout":{"type":"constrained"}} -->
 <section class="wp-block-group"><!-- wp:heading -->
-<h2 class="wp-block-heading">関連記事</h2>
+<h2 class="wp-block-heading">%1$s</h2>
 <!-- /wp:heading -->
 
 <!-- wp:query {"query":{"perPage":3,"pages":0,"offset":0,"postType":"post","order":"desc","orderBy":"date","author":"","search":"","exclude":[],"sticky":"","inherit":false,"od_related_to":0},"namespace":"od-related-query/related"} -->
@@ -503,11 +503,17 @@ final class Sample_Content_Seeder {
 
 <!-- wp:query-no-results -->
 <!-- wp:paragraph -->
-<p>関連記事が見つかりませんでした。</p>
+<p>%2$s</p>
 <!-- /wp:paragraph -->
 <!-- /wp:query-no-results --></div>
 <!-- /wp:query --></section>
 <!-- /wp:group -->
 HTML;
+
+		return sprintf(
+			$template,
+			esc_html__( 'Related content', 'od-related-query' ),
+			esc_html__( 'No related content found.', 'od-related-query' )
+		);
 	}
 }

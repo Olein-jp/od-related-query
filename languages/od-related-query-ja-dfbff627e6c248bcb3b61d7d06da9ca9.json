@@ -1,0 +1,84 @@
+{
+    "translation-revision-date": "2026-07-28 00:00+0900",
+    "generator": "WP-CLI\/2.12.0",
+    "source": "build\/index.js",
+    "domain": "messages",
+    "locale_data": {
+        "messages": {
+            "": {
+                "domain": "messages",
+                "lang": "ja",
+                "plural-forms": "nplurals=1; plural=0;"
+            },
+            "Related content": [
+                "\u95a2\u9023\u8a18\u4e8b"
+            ],
+            "No related content found.": [
+                "\u95a2\u9023\u8a18\u4e8b\u304c\u898b\u3064\u304b\u308a\u307e\u305b\u3093\u3067\u3057\u305f\u3002"
+            ],
+            "Select a post type in the Query settings to load its taxonomies.": [
+                "\u30af\u30a8\u30ea\u30fc\u8a2d\u5b9a\u3067\u6295\u7a3f\u30bf\u30a4\u30d7\u3092\u9078\u629e\u3059\u308b\u3068\u3001\u305d\u306e\u30bf\u30af\u30bd\u30ce\u30df\u30fc\u3092\u8aad\u307f\u8fbc\u307f\u307e\u3059\u3002"
+            ],
+            "The source and target post types do not share any public taxonomies. Related content cannot be determined for this combination.": [
+                "\u5224\u5b9a\u5143\u3068\u8868\u793a\u5bfe\u8c61\u306e\u6295\u7a3f\u30bf\u30a4\u30d7\u306b\u5171\u901a\u3059\u308b\u516c\u958b\u30bf\u30af\u30bd\u30ce\u30df\u30fc\u304c\u3042\u308a\u307e\u305b\u3093\u3002\u3053\u306e\u7d44\u307f\u5408\u308f\u305b\u3067\u306f\u95a2\u9023\u8a18\u4e8b\u3092\u5224\u5b9a\u3067\u304d\u307e\u305b\u3093\u3002"
+            ],
+            "No public taxonomies are available for the selected post type.": [
+                "\u9078\u629e\u3057\u305f\u6295\u7a3f\u30bf\u30a4\u30d7\u3067\u5229\u7528\u3067\u304d\u308b\u516c\u958b\u30bf\u30af\u30bd\u30ce\u30df\u30fc\u304c\u3042\u308a\u307e\u305b\u3093\u3002"
+            ],
+            "Choose the taxonomies used to find shared terms. New public taxonomies are selected automatically.": [
+                "\u5171\u901a\u30bf\u30fc\u30e0\u306e\u691c\u7d22\u306b\u4f7f\u7528\u3059\u308b\u30bf\u30af\u30bd\u30ce\u30df\u30fc\u3092\u9078\u629e\u3057\u3066\u304f\u3060\u3055\u3044\u3002\u65b0\u3057\u3044\u516c\u958b\u30bf\u30af\u30bd\u30ce\u30df\u30fc\u306f\u81ea\u52d5\u7684\u306b\u9078\u629e\u3055\u308c\u307e\u3059\u3002"
+            ],
+            "Related content order": [
+                "\u95a2\u9023\u8a18\u4e8b\u306e\u4e26\u3073\u9806"
+            ],
+            "Relevance counts shared terms. Ties use newest content first.": [
+                "\u95a2\u9023\u5ea6\u306f\u5171\u901a\u30bf\u30fc\u30e0\u6570\u3067\u5224\u5b9a\u3057\u307e\u3059\u3002\u540c\u6570\u306e\u5834\u5408\u306f\u65b0\u3057\u3044\u6295\u7a3f\u3092\u512a\u5148\u3057\u307e\u3059\u3002"
+            ],
+            "Date": [
+                "\u65e5\u4ed8"
+            ],
+            "Relevance": [
+                "\u95a2\u9023\u5ea6"
+            ],
+            "Loading preview source posts\u2026": [
+                "\u30d7\u30ec\u30d3\u30e5\u30fc\u5143\u306e\u6295\u7a3f\u3092\u8aad\u307f\u8fbc\u3093\u3067\u3044\u307e\u3059\u2026"
+            ],
+            "Preview source posts could not be loaded.": [
+                "\u30d7\u30ec\u30d3\u30e5\u30fc\u5143\u306e\u6295\u7a3f\u3092\u8aad\u307f\u8fbc\u3081\u307e\u305b\u3093\u3067\u3057\u305f\u3002"
+            ],
+            "No published posts are available for this post type. Publish a post to preview related content in the template editor.": [
+                "\u3053\u306e\u6295\u7a3f\u30bf\u30a4\u30d7\u306b\u306f\u516c\u958b\u6e08\u307f\u306e\u6295\u7a3f\u304c\u3042\u308a\u307e\u305b\u3093\u3002\u30c6\u30f3\u30d7\u30ec\u30fc\u30c8\u30a8\u30c7\u30a3\u30bf\u30fc\u3067\u95a2\u9023\u8a18\u4e8b\u3092\u30d7\u30ec\u30d3\u30e5\u30fc\u3059\u308b\u306b\u306f\u3001\u6295\u7a3f\u3092\u516c\u958b\u3057\u3066\u304f\u3060\u3055\u3044\u3002"
+            ],
+            "Preview source post": [
+                "\u30d7\u30ec\u30d3\u30e5\u30fc\u5143\u306e\u6295\u7a3f"
+            ],
+            "Used only for the template editor preview. The frontend always uses the post being viewed.": [
+                "\u30c6\u30f3\u30d7\u30ec\u30fc\u30c8\u30a8\u30c7\u30a3\u30bf\u30fc\u306e\u30d7\u30ec\u30d3\u30e5\u30fc\u306b\u306e\u307f\u4f7f\u7528\u3057\u307e\u3059\u3002\u30d5\u30ed\u30f3\u30c8\u30a8\u30f3\u30c9\u3067\u306f\u5e38\u306b\u8868\u793a\u4e2d\u306e\u6295\u7a3f\u3092\u4f7f\u7528\u3057\u307e\u3059\u3002"
+            ],
+            "(Untitled)": [
+                "\uff08\u30bf\u30a4\u30c8\u30eb\u306a\u3057\uff09"
+            ],
+            "Loading available taxonomies\u2026": [
+                "\u5229\u7528\u53ef\u80fd\u306a\u30bf\u30af\u30bd\u30ce\u30df\u30fc\u3092\u8aad\u307f\u8fbc\u3093\u3067\u3044\u307e\u3059\u2026"
+            ],
+            "The available taxonomies could not be loaded.": [
+                "\u5229\u7528\u53ef\u80fd\u306a\u30bf\u30af\u30bd\u30ce\u30df\u30fc\u3092\u8aad\u307f\u8fbc\u3081\u307e\u305b\u3093\u3067\u3057\u305f\u3002"
+            ],
+            "Select at least one taxonomy to display related content. With no taxonomies selected, this Query Loop returns no results.": [
+                "\u95a2\u9023\u8a18\u4e8b\u3092\u8868\u793a\u3059\u308b\u306b\u306f\u3001\u30bf\u30af\u30bd\u30ce\u30df\u30fc\u30921\u3064\u4ee5\u4e0a\u9078\u629e\u3057\u3066\u304f\u3060\u3055\u3044\u3002\u30bf\u30af\u30bd\u30ce\u30df\u30fc\u304c\u672a\u9078\u629e\u306e\u5834\u5408\u3001\u3053\u306e Query Loop \u306f\u7d50\u679c\u3092\u8fd4\u3057\u307e\u305b\u3093\u3002"
+            ],
+            "Related Content": [
+                "\u95a2\u9023\u8a18\u4e8b"
+            ],
+            "Displays content that shares a category, tag, or public custom taxonomy term with the current post.": [
+                "\u73fe\u5728\u306e\u6295\u7a3f\u3068\u30ab\u30c6\u30b4\u30ea\u30fc\u3001\u30bf\u30b0\u3001\u307e\u305f\u306f\u516c\u958b\u30ab\u30b9\u30bf\u30e0\u30bf\u30af\u30bd\u30ce\u30df\u30fc\u306e\u30bf\u30fc\u30e0\u304c\u5171\u901a\u3059\u308b\u6295\u7a3f\u3092\u8868\u793a\u3057\u307e\u3059\u3002"
+            ],
+            "related": [
+                "\u95a2\u9023"
+            ],
+            "posts": [
+                "\u6295\u7a3f"
+            ]
+        }
+    }
+}

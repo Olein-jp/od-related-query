@@ -1,0 +1,272 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: OD Related Query 0.1.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/od-related-query\n"
+"Last-Translator: Olein\n"
+"Language-Team: Japanese\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: 2026-07-28 00:00+0900\n"
+"Language: ja\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: WP-CLI 2.12.0\n"
+"X-Domain: od-related-query\n"
+
+#. Plugin Name of the plugin
+#: od-related-query.php
+msgid "OD Related Query"
+msgstr "OD Related Query"
+
+#. Description of the plugin
+#: od-related-query.php
+msgid "Adds a related-content variation to the Query Loop block."
+msgstr "Query Loop ブロックに関連記事バリエーションを追加します。"
+
+#. Author of the plugin
+#: od-related-query.php
+msgid "Olein"
+msgstr "Olein"
+
+#: scripts/class-sample-content-seeder.php:48
+msgid "Plugin Development"
+msgstr "プラグイン開発"
+
+#: scripts/class-sample-content-seeder.php:49
+msgid "Block Themes"
+msgstr "ブロックテーマ"
+
+#: scripts/class-sample-content-seeder.php:50
+msgid "Performance"
+msgstr "パフォーマンス"
+
+#. translators: 1: number of posts, 2: template status.
+#: scripts/class-sample-content-seeder.php:73
+#, php-format
+msgid "Prepared %1$d sample posts. Single template: %2$s"
+msgstr "%1$d件のサンプル投稿を用意しました。個別投稿テンプレート：%2$s"
+
+#: scripts/class-sample-content-seeder.php:75
+msgid "unchanged"
+msgstr "変更なし"
+
+#: scripts/class-sample-content-seeder.php:192
+msgid "Understanding the Query Loop block"
+msgstr "Query Loop ブロックの基本を理解する"
+
+#: scripts/class-sample-content-seeder.php:197
+msgid "Design notes for a related-content plugin"
+msgstr "関連記事プラグインの設計メモ"
+
+#: scripts/class-sample-content-seeder.php:202
+msgid "Organizing posts with categories"
+msgstr "カテゴリーを使った投稿の分類方法"
+
+#: scripts/class-sample-content-seeder.php:207
+msgid "Connecting content across the site with tags"
+msgstr "タグを活用して記事を横断的につなぐ"
+
+#: scripts/class-sample-content-seeder.php:212
+msgid "Editing single-post templates in block themes"
+msgstr "ブロックテーマで個別投稿テンプレートを編集する"
+
+#: scripts/class-sample-content-seeder.php:217
+msgid "Styling post cards with theme.json"
+msgstr "theme.json で投稿カードを整える"
+
+#: scripts/class-sample-content-seeder.php:222
+msgid "Designing hooks for WordPress plugins"
+msgstr "WordPress プラグインのフック設計"
+
+#: scripts/class-sample-content-seeder.php:227
+msgid "When to use the Block Variation API"
+msgstr "Block Variation API の使いどころ"
+
+#: scripts/class-sample-content-seeder.php:232
+msgid "The basics of WP_Query and tax_query"
+msgstr "WP_Query と tax_query の基礎"
+
+#: scripts/class-sample-content-seeder.php:237
+msgid "Keeping editor previews consistent with the REST API"
+msgstr "REST API でエディタープレビューを揃える"
+
+#: scripts/class-sample-content-seeder.php:242
+msgid "Preparing development content with WP-CLI"
+msgstr "WP-CLI で開発用コンテンツを準備する"
+
+#: scripts/class-sample-content-seeder.php:247
+msgid "Writing WordPress integration tests with PHPUnit"
+msgstr "PHPUnit で WordPress 統合テストを書く"
+
+#: scripts/class-sample-content-seeder.php:252
+msgid "Testing block extensions with JavaScript"
+msgstr "JavaScript でブロック拡張をテストする"
+
+#: scripts/class-sample-content-seeder.php:257
+msgid "Choosing the Query Loop item count and order"
+msgstr "Query Loop の表示件数と並び順を考える"
+
+#: scripts/class-sample-content-seeder.php:262
+msgid "Measuring taxonomy query load"
+msgstr "タクソノミークエリの負荷を確認する"
+
+#: scripts/class-sample-content-seeder.php:267
+msgid "What to measure before caching related content"
+msgstr "関連記事をキャッシュする前に測ること"
+
+#: scripts/class-sample-content-seeder.php:272
+msgid "Reducing block editor asset size"
+msgstr "ブロックエディターのアセットを軽量化する"
+
+#: scripts/class-sample-content-seeder.php:277
+msgid "Preparing for custom taxonomy extensions"
+msgstr "カスタムタクソノミー拡張への準備"
+
+#: scripts/class-sample-content-seeder.php:282
+msgid "Adjusting card layouts in the Site Editor"
+msgstr "サイトエディターでカードレイアウトを調整する"
+
+#: scripts/class-sample-content-seeder.php:287
+msgid "Related-content display checklist"
+msgstr "関連記事表示の確認チェックリスト"
+
+#. translators: %s: sample post title.
+#: scripts/class-sample-content-seeder.php:306
+#, php-format
+msgid "This sample post is used to preview “%s”."
+msgstr "「%s」の表示確認に使用するサンプル投稿です。"
+
+#: scripts/class-sample-content-seeder.php:310
+msgid "What to check"
+msgstr "確認ポイント"
+
+#: scripts/class-sample-content-seeder.php:311
+msgid "Confirm that posts sharing categories or tags appear in the related-content section of the single-post template."
+msgstr "カテゴリーやタグが共通する投稿が、個別投稿テンプレートの関連記事セクションに表示されることを確認してください。"
+
+#: scripts/class-sample-content-seeder.php:425
+msgid "The single template is already customized, so it was not changed."
+msgstr "個別投稿テンプレートはすでにカスタマイズされているため、変更しませんでした。"
+
+#: scripts/class-sample-content-seeder.php:434
+msgid "The active theme does not provide templates/single.html."
+msgstr "有効なテーマに templates/single.html がありません。"
+
+#: scripts/class-sample-content-seeder.php:466
+msgid "Single Posts"
+msgstr "個別投稿"
+
+#: scripts/class-sample-content-seeder.php:515
+#: src/index.js:364
+msgid "Related content"
+msgstr "関連記事"
+
+#: scripts/class-sample-content-seeder.php:516
+#: src/variation.js:175
+msgid "No related content found."
+msgstr "関連記事が見つかりませんでした。"
+
+#: src/class-related-query.php:153
+msgid "Post ID used as the source for related content."
+msgstr "関連記事の判定元として使用する投稿 ID。"
+
+#: src/class-related-query.php:159
+msgid "Post ID used only as the template editor preview source."
+msgstr "テンプレートエディターのプレビュー元としてのみ使用する投稿 ID。"
+
+#: src/class-related-query.php:165
+msgid "Ordering used for related content."
+msgstr "関連記事に使用する並び順。"
+
+#: src/class-related-query.php:171
+msgid "Taxonomies used to determine related content."
+msgstr "関連記事の判定に使用するタクソノミー。"
+
+#: src/class-related-query.php:178
+msgid "Taxonomies excluded when determining related content."
+msgstr "関連記事の判定から除外するタクソノミー。"
+
+#: src/index.js:34
+msgid "Select a post type in the Query settings to load its taxonomies."
+msgstr "クエリー設定で投稿タイプを選択すると、そのタクソノミーを読み込みます。"
+
+#: src/index.js:41
+msgid "The source and target post types do not share any public taxonomies. Related content cannot be determined for this combination."
+msgstr "判定元と表示対象の投稿タイプに共通する公開タクソノミーがありません。この組み合わせでは関連記事を判定できません。"
+
+#: src/index.js:47
+msgid "No public taxonomies are available for the selected post type."
+msgstr "選択した投稿タイプで利用できる公開タクソノミーがありません。"
+
+#: src/index.js:370
+msgid "Choose the taxonomies used to find shared terms. New public taxonomies are selected automatically."
+msgstr "共通タームの検索に使用するタクソノミーを選択してください。新しい公開タクソノミーは自動的に選択されます。"
+
+#: src/index.js:376
+msgid "Related content order"
+msgstr "関連記事の並び順"
+
+#: src/index.js:377
+msgid "Relevance counts shared terms. Ties use newest content first."
+msgstr "関連度は共通ターム数で判定します。同数の場合は新しい投稿を優先します。"
+
+#: src/index.js:387
+msgid "Date"
+msgstr "日付"
+
+#: src/index.js:391
+msgid "Relevance"
+msgstr "関連度"
+
+#: src/index.js:405
+msgid "Loading preview source posts…"
+msgstr "プレビュー元の投稿を読み込んでいます…"
+
+#: src/index.js:419
+msgid "Preview source posts could not be loaded."
+msgstr "プレビュー元の投稿を読み込めませんでした。"
+
+#: src/index.js:434
+msgid "No published posts are available for this post type. Publish a post to preview related content in the template editor."
+msgstr "この投稿タイプには公開済みの投稿がありません。テンプレートエディターで関連記事をプレビューするには、投稿を公開してください。"
+
+#: src/index.js:444
+msgid "Preview source post"
+msgstr "プレビュー元の投稿"
+
+#: src/index.js:445
+msgid "Used only for the template editor preview. The frontend always uses the post being viewed."
+msgstr "テンプレートエディターのプレビューにのみ使用します。フロントエンドでは常に表示中の投稿を使用します。"
+
+#: src/index.js:459
+msgid "(Untitled)"
+msgstr "（タイトルなし）"
+
+#: src/index.js:471
+msgid "Loading available taxonomies…"
+msgstr "利用可能なタクソノミーを読み込んでいます…"
+
+#: src/index.js:484
+msgid "The available taxonomies could not be loaded."
+msgstr "利用可能なタクソノミーを読み込めませんでした。"
+
+#: src/index.js:527
+msgid "Select at least one taxonomy to display related content. With no taxonomies selected, this Query Loop returns no results."
+msgstr "関連記事を表示するには、タクソノミーを1つ以上選択してください。タクソノミーが未選択の場合、この Query Loop は結果を返しません。"
+
+#: src/variation.js:109
+msgid "Related Content"
+msgstr "関連記事"
+
+#: src/variation.js:110
+msgid "Displays content that shares a category, tag, or public custom taxonomy term with the current post."
+msgstr "現在の投稿とカテゴリー、タグ、または公開カスタムタクソノミーのタームが共通する投稿を表示します。"
+
+#: src/variation.js:116
+msgid "related"
+msgstr "関連"
+
+#: src/variation.js:117
+msgid "posts"
+msgstr "投稿"
