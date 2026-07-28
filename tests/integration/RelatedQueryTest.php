@@ -44,6 +44,11 @@ class Related_Query_Test extends WP_UnitTestCase {
 	 */
 	public function tear_down() {
 		unregister_taxonomy( self::TAXONOMY );
+
+		if ( post_type_exists( 'od_related_item' ) ) {
+			unregister_post_type( 'od_related_item' );
+		}
+
 		parent::tear_down();
 	}
 
@@ -130,6 +135,86 @@ class Related_Query_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * A target post type selected in the Query Loop remains in effect.
+	 *
+	 * @return void
+	 */
+	public function test_selected_target_post_type_is_preserved() {
+		register_post_type(
+			'od_related_item',
+			array(
+				'public' => true,
+			)
+		);
+		register_taxonomy_for_object_type( self::TAXONOMY, 'od_related_item' );
+
+		$topic_id  = self::factory()->term->create(
+			array(
+				'taxonomy' => self::TAXONOMY,
+			)
+		);
+		$source_id = self::factory()->post->create();
+		$match_id  = self::factory()->post->create(
+			array(
+				'post_type' => 'od_related_item',
+			)
+		);
+
+		wp_set_post_terms( $source_id, array( $topic_id ), self::TAXONOMY );
+		wp_set_post_terms( $match_id, array( $topic_id ), self::TAXONOMY );
+
+		$related_query = new Related_Query();
+		$args          = $related_query->apply_related_arguments(
+			array(
+				'fields'    => 'ids',
+				'post_type' => 'od_related_item',
+			),
+			$source_id
+		);
+
+		$this->assertSame( 'od_related_item', $args['post_type'] );
+		$this->assertSame( array( $match_id ), get_posts( $args ) );
+	}
+
+	/**
+	 * Selected taxonomies limit which shared terms count as related.
+	 *
+	 * @return void
+	 */
+	public function test_selected_taxonomies_limit_relationship_matching() {
+		$category_id       = self::factory()->term->create(
+			array(
+				'taxonomy' => 'category',
+			)
+		);
+		$topic_id          = self::factory()->term->create(
+			array(
+				'taxonomy' => self::TAXONOMY,
+			)
+		);
+		$source_id         = self::factory()->post->create();
+		$category_match_id = self::factory()->post->create();
+		$topic_match_id    = self::factory()->post->create();
+
+		wp_set_post_terms( $source_id, array( $category_id ), 'category' );
+		wp_set_post_terms( $source_id, array( $topic_id ), self::TAXONOMY );
+		wp_set_post_terms( $category_match_id, array( $category_id ), 'category' );
+		wp_set_post_terms( $topic_match_id, array( $topic_id ), self::TAXONOMY );
+
+		$related_query = new Related_Query();
+		$args          = $related_query->apply_related_arguments(
+			array(
+				'fields' => 'ids',
+			),
+			$source_id,
+			array( self::TAXONOMY )
+		);
+
+		$this->assertSame( array( $topic_match_id ), get_posts( $args ) );
+		$this->assertNotContains( $category_match_id, get_posts( $args ) );
+	}
+
+	/**
 	 * Other Query Loop blocks are not modified.
 	 *
 	 * @return void
@@ -181,6 +266,10 @@ class Related_Query_Test extends WP_UnitTestCase {
 
 		$request = new WP_REST_Request( 'GET', '/wp/v2/posts' );
 		$request->set_param( Related_Query::REST_PARAMETER, $source_id );
+		$request->set_param(
+			Related_Query::REST_TAXONOMIES_PARAMETER,
+			array( 'category' )
+		);
 		$request->set_param( 'per_page', 10 );
 
 		$response = rest_do_request( $request );

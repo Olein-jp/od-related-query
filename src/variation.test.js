@@ -1,6 +1,7 @@
 import {
 	RELATED_POST_PARAMETER,
 	RELATED_QUERY_VARIATION,
+	RELATED_TAXONOMIES_PARAMETER,
 	VARIATION_NAMESPACE,
 } from './variation';
 
@@ -15,9 +16,12 @@ describe( 'related Query Loop variation', () => {
 			postType: 'post',
 			inherit: false,
 			[ RELATED_POST_PARAMETER ]: 0,
+			[ RELATED_TAXONOMIES_PARAMETER ]: [],
 		} );
 		expect( RELATED_QUERY_VARIATION.allowedControls ).toEqual( [
+			'postType',
 			'order',
+			'postCount',
 		] );
 	} );
 

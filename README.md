@@ -14,6 +14,12 @@ content that:
 The variation displays three newest matches by default. Its Post Template is
 made entirely from Core blocks, so themes can control its layout and styling.
 
+Use the Query Loop sidebar to change the target post type, items per page, sort
+order, and the taxonomies used for relationship matching. The target initially
+follows the post being edited, and a manual post-type selection is preserved
+afterward. Leaving every relationship taxonomy unchecked uses all viewable
+taxonomies attached to the source post type.
+
 ## Development
 
 ```sh
@@ -50,9 +56,10 @@ npm run test:php
 npm run env:test:stop
 ```
 
-## MVP limitations
+## Current limitations
 
-- Matching uses an `OR` relationship across all viewable taxonomies.
+- Matching uses an `OR` relationship across the selected taxonomies (or all
+  viewable taxonomies when none are selected).
 - Results are ordered by date; relevance scoring is not included.
 - A template editor has no concrete source post, so its canvas shows the
   no-results state. The frontend resolves the currently displayed post.

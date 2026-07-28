@@ -32,6 +32,13 @@ final class Related_Query {
 	const REST_PARAMETER = 'od_related_to';
 
 	/**
+	 * REST API parameter used to limit relationship taxonomies.
+	 *
+	 * @var string
+	 */
+	const REST_TAXONOMIES_PARAMETER = 'od_related_taxonomies';
+
+	/**
 	 * Registers WordPress hooks.
 	 *
 	 * @return void
@@ -62,7 +69,13 @@ final class Related_Query {
 			return $query;
 		}
 
-		return $this->apply_related_arguments( $query, get_queried_object_id() );
+		$taxonomies = $block_query[ self::REST_TAXONOMIES_PARAMETER ] ?? array();
+
+		return $this->apply_related_arguments(
+			$query,
+			get_queried_object_id(),
+			is_array( $taxonomies ) ? $taxonomies : array()
+		);
 	}
 
 	/**
@@ -99,11 +112,18 @@ final class Related_Query {
 	 * @return array<string, mixed>
 	 */
 	public function filter_rest_collection_params( $query_params ) {
-		$query_params[ self::REST_PARAMETER ] = array(
+		$query_params[ self::REST_PARAMETER ]            = array(
 			'description'       => __( 'Post ID used as the source for related content.', 'od-related-query' ),
 			'type'              => 'integer',
 			'minimum'           => 0,
 			'sanitize_callback' => 'absint',
+		);
+		$query_params[ self::REST_TAXONOMIES_PARAMETER ] = array(
+			'description' => __( 'Taxonomies used to determine related content.', 'od-related-query' ),
+			'type'        => 'array',
+			'items'       => array(
+				'type' => 'string',
+			),
 		);
 
 		return $query_params;
@@ -121,20 +141,24 @@ final class Related_Query {
 			return $args;
 		}
 
+		$taxonomies = $request->get_param( self::REST_TAXONOMIES_PARAMETER );
+
 		return $this->apply_related_arguments(
 			$args,
-			absint( $request->get_param( self::REST_PARAMETER ) )
+			absint( $request->get_param( self::REST_PARAMETER ) ),
+			is_array( $taxonomies ) ? $taxonomies : array()
 		);
 	}
 
 	/**
 	 * Applies the query constraints shared by frontend and editor requests.
 	 *
-	 * @param array<string, mixed> $query   Existing query arguments.
-	 * @param int                  $post_id Source post ID.
+	 * @param array<string, mixed> $query                Existing query arguments.
+	 * @param int                  $post_id              Source post ID.
+	 * @param array<int, string>   $selected_taxonomies Taxonomies used for matching.
 	 * @return array<string, mixed>
 	 */
-	public function apply_related_arguments( $query, $post_id ) {
+	public function apply_related_arguments( $query, $post_id, $selected_taxonomies = array() ) {
 		$post = get_post( $post_id );
 
 		if ( ! $post ) {
@@ -148,15 +172,31 @@ final class Related_Query {
 			$excluded_posts = array_map( 'absint', $query['post__not_in'] );
 		}
 
-		$excluded_posts[]      = $post_id;
-		$query['post_type']    = $post->post_type;
+		$excluded_posts[] = $post_id;
+		if (
+			! isset( $query['post_type'] )
+			|| ! is_string( $query['post_type'] )
+			|| ! post_type_exists( $query['post_type'] )
+		) {
+			$query['post_type'] = $post->post_type;
+		}
+
 		$query['post__not_in'] = array_values( array_unique( $excluded_posts ) );
 
-		$tax_query  = array( 'relation' => 'OR' );
-		$taxonomies = get_object_taxonomies( $post->post_type, 'objects' );
+		$tax_query           = array( 'relation' => 'OR' );
+		$taxonomies          = get_object_taxonomies( $post->post_type, 'objects' );
+		$selected_taxonomies = array_filter(
+			array_map( 'sanitize_key', $selected_taxonomies )
+		);
 
 		foreach ( $taxonomies as $taxonomy ) {
-			if ( ! is_taxonomy_viewable( $taxonomy ) ) {
+			if (
+				! is_taxonomy_viewable( $taxonomy )
+				|| (
+					! empty( $selected_taxonomies )
+					&& ! in_array( $taxonomy->name, $selected_taxonomies, true )
+				)
+			) {
 				continue;
 			}
 

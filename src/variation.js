@@ -2,6 +2,7 @@ import { __ } from '@wordpress/i18n';
 
 export const VARIATION_NAMESPACE = 'od-related-query/related';
 export const RELATED_POST_PARAMETER = 'od_related_to';
+export const RELATED_TAXONOMIES_PARAMETER = 'od_related_taxonomies';
 
 export const RELATED_QUERY_VARIATION = {
 	name: VARIATION_NAMESPACE,
@@ -30,9 +31,10 @@ export const RELATED_QUERY_VARIATION = {
 			sticky: '',
 			inherit: false,
 			[ RELATED_POST_PARAMETER ]: 0,
+			[ RELATED_TAXONOMIES_PARAMETER ]: [],
 		},
 	},
-	allowedControls: [ 'order' ],
+	allowedControls: [ 'postType', 'order', 'postCount' ],
 	scope: [ 'inserter' ],
 	isActive: [ 'namespace' ],
 	innerBlocks: [
