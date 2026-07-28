@@ -3,6 +3,60 @@ import { __ } from '@wordpress/i18n';
 export const VARIATION_NAMESPACE = 'od-related-query/related';
 export const RELATED_POST_PARAMETER = 'od_related_to';
 export const RELATED_TAXONOMIES_PARAMETER = 'od_related_taxonomies';
+export const RELATED_EXCLUDED_TAXONOMIES_PARAMETER =
+	'od_related_taxonomies_excluded';
+
+/**
+ * Returns the taxonomy slugs selected by the current query configuration.
+ *
+ * The excluded-taxonomies setting takes precedence. The older selected-
+ * taxonomies setting remains supported for blocks created by previous versions.
+ *
+ * @param {Array}  availableTaxonomies Available taxonomy records.
+ * @param {Object} query               Query Loop query attributes.
+ * @return {string[]} Selected taxonomy slugs.
+ */
+export function getSelectedTaxonomySlugs( availableTaxonomies, query = {} ) {
+	const availableSlugs = availableTaxonomies
+		.map( ( taxonomy ) => taxonomy.slug )
+		.filter( Boolean );
+	const excludedTaxonomies = query[ RELATED_EXCLUDED_TAXONOMIES_PARAMETER ];
+
+	if ( Array.isArray( excludedTaxonomies ) ) {
+		return availableSlugs.filter(
+			( slug ) => ! excludedTaxonomies.includes( slug )
+		);
+	}
+
+	const legacySelectedTaxonomies = query[ RELATED_TAXONOMIES_PARAMETER ];
+
+	if (
+		Array.isArray( legacySelectedTaxonomies ) &&
+		legacySelectedTaxonomies.length
+	) {
+		return availableSlugs.filter( ( slug ) =>
+			legacySelectedTaxonomies.includes( slug )
+		);
+	}
+
+	return availableSlugs;
+}
+
+/**
+ * Returns the available taxonomy slugs that are not selected.
+ *
+ * @param {Array}    availableTaxonomies Available taxonomy records.
+ * @param {string[]} selectedTaxonomies  Selected taxonomy slugs.
+ * @return {string[]} Excluded taxonomy slugs.
+ */
+export function getExcludedTaxonomySlugs(
+	availableTaxonomies,
+	selectedTaxonomies
+) {
+	return availableTaxonomies
+		.map( ( taxonomy ) => taxonomy.slug )
+		.filter( ( slug ) => slug && ! selectedTaxonomies.includes( slug ) );
+}
 
 export const RELATED_QUERY_VARIATION = {
 	name: VARIATION_NAMESPACE,
@@ -31,7 +85,7 @@ export const RELATED_QUERY_VARIATION = {
 			sticky: '',
 			inherit: false,
 			[ RELATED_POST_PARAMETER ]: 0,
-			[ RELATED_TAXONOMIES_PARAMETER ]: [],
+			[ RELATED_EXCLUDED_TAXONOMIES_PARAMETER ]: [],
 		},
 	},
 	allowedControls: [ 'postType', 'order', 'postCount' ],

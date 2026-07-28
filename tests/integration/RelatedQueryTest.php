@@ -215,6 +215,81 @@ class Related_Query_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Explicitly excluded taxonomies do not count as relationship signals.
+	 *
+	 * @return void
+	 */
+	public function test_excluded_taxonomies_limit_relationship_matching() {
+		$category_id       = self::factory()->term->create(
+			array(
+				'taxonomy' => 'category',
+			)
+		);
+		$topic_id          = self::factory()->term->create(
+			array(
+				'taxonomy' => self::TAXONOMY,
+			)
+		);
+		$source_id         = self::factory()->post->create();
+		$category_match_id = self::factory()->post->create();
+		$topic_match_id    = self::factory()->post->create();
+
+		wp_set_post_terms( $source_id, array( $category_id ), 'category' );
+		wp_set_post_terms( $source_id, array( $topic_id ), self::TAXONOMY );
+		wp_set_post_terms( $category_match_id, array( $category_id ), 'category' );
+		wp_set_post_terms( $topic_match_id, array( $topic_id ), self::TAXONOMY );
+
+		$related_query = new Related_Query();
+		$args          = $related_query->apply_related_arguments(
+			array(
+				'fields' => 'ids',
+			),
+			$source_id,
+			array(),
+			array( 'category', 'post_tag' )
+		);
+
+		$this->assertSame( array( $topic_match_id ), get_posts( $args ) );
+		$this->assertNotContains( $category_match_id, get_posts( $args ) );
+	}
+
+	/**
+	 * Excluding every available taxonomy returns no related posts.
+	 *
+	 * @return void
+	 */
+	public function test_excluding_all_taxonomies_returns_no_results() {
+		$category_id = self::factory()->term->create(
+			array(
+				'taxonomy' => 'category',
+			)
+		);
+		$topic_id    = self::factory()->term->create(
+			array(
+				'taxonomy' => self::TAXONOMY,
+			)
+		);
+		$source_id   = self::factory()->post->create();
+		self::factory()->post->create();
+
+		wp_set_post_terms( $source_id, array( $category_id ), 'category' );
+		wp_set_post_terms( $source_id, array( $topic_id ), self::TAXONOMY );
+
+		$related_query = new Related_Query();
+		$args          = $related_query->apply_related_arguments(
+			array(
+				'fields' => 'ids',
+			),
+			$source_id,
+			array(),
+			array( 'category', 'post_tag', self::TAXONOMY )
+		);
+
+		$this->assertSame( array( 0 ), $args['post__in'] );
+		$this->assertSame( array(), get_posts( $args ) );
+	}
+
+	/**
 	 * Other Query Loop blocks are not modified.
 	 *
 	 * @return void

@@ -1,13 +1,16 @@
 import { registerBlockVariation } from '@wordpress/blocks';
 import { InspectorControls } from '@wordpress/block-editor';
 import { createHigherOrderComponent } from '@wordpress/compose';
-import { CheckboxControl, PanelBody } from '@wordpress/components';
+import { CheckboxControl, Notice, PanelBody } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
 import { createElement, Fragment, useEffect } from '@wordpress/element';
 import { addFilter } from '@wordpress/hooks';
 import { __ } from '@wordpress/i18n';
 
 import {
+	getExcludedTaxonomySlugs,
+	getSelectedTaxonomySlugs,
+	RELATED_EXCLUDED_TAXONOMIES_PARAMETER,
 	RELATED_POST_PARAMETER,
 	RELATED_QUERY_VARIATION,
 	RELATED_TAXONOMIES_PARAMETER,
@@ -47,11 +50,10 @@ function RelatedQueryBlockEdit( { BlockEdit, ...props } ) {
 				( taxonomy ) => false !== taxonomy.visibility?.public
 		  )
 		: [];
-	const selectedTaxonomies = Array.isArray(
-		query[ RELATED_TAXONOMIES_PARAMETER ]
-	)
-		? query[ RELATED_TAXONOMIES_PARAMETER ]
-		: [];
+	const selectedTaxonomies = getSelectedTaxonomySlugs(
+		availableTaxonomies,
+		query
+	);
 
 	useEffect( () => {
 		if ( ! hasUsablePostContext ) {
@@ -91,14 +93,18 @@ function RelatedQueryBlockEdit( { BlockEdit, ...props } ) {
 		const nextTaxonomies = isSelected
 			? [ ...selectedTaxonomies, taxonomySlug ]
 			: selectedTaxonomies.filter( ( slug ) => slug !== taxonomySlug );
+		const nextQuery = {
+			...query,
+			[ RELATED_EXCLUDED_TAXONOMIES_PARAMETER ]: getExcludedTaxonomySlugs(
+				availableTaxonomies,
+				[ ...new Set( nextTaxonomies ) ]
+			),
+		};
 
+		// Migrate an edited legacy block to exclusion-based storage.
+		delete nextQuery[ RELATED_TAXONOMIES_PARAMETER ];
 		setAttributes( {
-			query: {
-				...query,
-				[ RELATED_TAXONOMIES_PARAMETER ]: [
-					...new Set( nextTaxonomies ),
-				],
-			},
+			query: nextQuery,
 		} );
 	};
 
@@ -119,7 +125,7 @@ function RelatedQueryBlockEdit( { BlockEdit, ...props } ) {
 					'p',
 					null,
 					__(
-						'Choose the taxonomies used to find shared terms. Leave all unchecked to use every available taxonomy.',
+						'Choose the taxonomies used to find shared terms. New public taxonomies are selected automatically.',
 						'od-related-query'
 					)
 				),
@@ -131,7 +137,20 @@ function RelatedQueryBlockEdit( { BlockEdit, ...props } ) {
 						onChange: ( isSelected ) =>
 							setTaxonomySelected( taxonomy.slug, isSelected ),
 					} )
-				)
+				),
+				0 < availableTaxonomies.length &&
+					0 === selectedTaxonomies.length &&
+					createElement(
+						Notice,
+						{
+							status: 'warning',
+							isDismissible: false,
+						},
+						__(
+							'Select at least one taxonomy to display related content. With no taxonomies selected, this Query Loop returns no results.',
+							'od-related-query'
+						)
+					)
 			)
 		)
 	);

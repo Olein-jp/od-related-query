@@ -1,4 +1,7 @@
 import {
+	getExcludedTaxonomySlugs,
+	getSelectedTaxonomySlugs,
+	RELATED_EXCLUDED_TAXONOMIES_PARAMETER,
 	RELATED_POST_PARAMETER,
 	RELATED_QUERY_VARIATION,
 	RELATED_TAXONOMIES_PARAMETER,
@@ -16,7 +19,7 @@ describe( 'related Query Loop variation', () => {
 			postType: 'post',
 			inherit: false,
 			[ RELATED_POST_PARAMETER ]: 0,
-			[ RELATED_TAXONOMIES_PARAMETER ]: [],
+			[ RELATED_EXCLUDED_TAXONOMIES_PARAMETER ]: [],
 		} );
 		expect( RELATED_QUERY_VARIATION.allowedControls ).toEqual( [
 			'postType',
@@ -38,5 +41,58 @@ describe( 'related Query Loop variation', () => {
 			'core/post-title',
 			'core/post-date',
 		] );
+	} );
+
+	it( 'selects every available taxonomy by default', () => {
+		const taxonomies = [
+			{ slug: 'category' },
+			{ slug: 'post_tag' },
+			{ slug: 'topic' },
+		];
+
+		expect( getSelectedTaxonomySlugs( taxonomies ) ).toEqual( [
+			'category',
+			'post_tag',
+			'topic',
+		] );
+	} );
+
+	it( 'keeps newly added taxonomies selected unless explicitly excluded', () => {
+		const query = {
+			[ RELATED_EXCLUDED_TAXONOMIES_PARAMETER ]: [ 'post_tag' ],
+		};
+		const taxonomies = [
+			{ slug: 'category' },
+			{ slug: 'post_tag' },
+			{ slug: 'new_topic' },
+		];
+
+		expect( getSelectedTaxonomySlugs( taxonomies, query ) ).toEqual( [
+			'category',
+			'new_topic',
+		] );
+	} );
+
+	it( 'supports selected taxonomies stored by previous versions', () => {
+		const query = {
+			[ RELATED_TAXONOMIES_PARAMETER ]: [ 'post_tag' ],
+		};
+		const taxonomies = [ { slug: 'category' }, { slug: 'post_tag' } ];
+
+		expect( getSelectedTaxonomySlugs( taxonomies, query ) ).toEqual( [
+			'post_tag',
+		] );
+	} );
+
+	it( 'stores every unchecked available taxonomy as excluded', () => {
+		const taxonomies = [
+			{ slug: 'category' },
+			{ slug: 'post_tag' },
+			{ slug: 'topic' },
+		];
+
+		expect(
+			getExcludedTaxonomySlugs( taxonomies, [ 'category' ] )
+		).toEqual( [ 'post_tag', 'topic' ] );
 	} );
 } );

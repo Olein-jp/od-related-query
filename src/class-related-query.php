@@ -39,6 +39,13 @@ final class Related_Query {
 	const REST_TAXONOMIES_PARAMETER = 'od_related_taxonomies';
 
 	/**
+	 * REST API parameter used to exclude relationship taxonomies.
+	 *
+	 * @var string
+	 */
+	const REST_EXCLUDED_TAXONOMIES_PARAMETER = 'od_related_taxonomies_excluded';
+
+	/**
 	 * Registers WordPress hooks.
 	 *
 	 * @return void
@@ -69,12 +76,17 @@ final class Related_Query {
 			return $query;
 		}
 
-		$taxonomies = $block_query[ self::REST_TAXONOMIES_PARAMETER ] ?? array();
+		$taxonomies          = $block_query[ self::REST_TAXONOMIES_PARAMETER ] ?? array();
+		$excluded_taxonomies = array_key_exists(
+			self::REST_EXCLUDED_TAXONOMIES_PARAMETER,
+			$block_query
+		) ? $block_query[ self::REST_EXCLUDED_TAXONOMIES_PARAMETER ] : null;
 
 		return $this->apply_related_arguments(
 			$query,
 			get_queried_object_id(),
-			is_array( $taxonomies ) ? $taxonomies : array()
+			is_array( $taxonomies ) ? $taxonomies : array(),
+			is_array( $excluded_taxonomies ) ? $excluded_taxonomies : null
 		);
 	}
 
@@ -112,14 +124,21 @@ final class Related_Query {
 	 * @return array<string, mixed>
 	 */
 	public function filter_rest_collection_params( $query_params ) {
-		$query_params[ self::REST_PARAMETER ]            = array(
+		$query_params[ self::REST_PARAMETER ]                     = array(
 			'description'       => __( 'Post ID used as the source for related content.', 'od-related-query' ),
 			'type'              => 'integer',
 			'minimum'           => 0,
 			'sanitize_callback' => 'absint',
 		);
-		$query_params[ self::REST_TAXONOMIES_PARAMETER ] = array(
+		$query_params[ self::REST_TAXONOMIES_PARAMETER ]          = array(
 			'description' => __( 'Taxonomies used to determine related content.', 'od-related-query' ),
+			'type'        => 'array',
+			'items'       => array(
+				'type' => 'string',
+			),
+		);
+		$query_params[ self::REST_EXCLUDED_TAXONOMIES_PARAMETER ] = array(
+			'description' => __( 'Taxonomies excluded when determining related content.', 'od-related-query' ),
 			'type'        => 'array',
 			'items'       => array(
 				'type' => 'string',
@@ -141,24 +160,34 @@ final class Related_Query {
 			return $args;
 		}
 
-		$taxonomies = $request->get_param( self::REST_TAXONOMIES_PARAMETER );
+		$taxonomies          = $request->get_param( self::REST_TAXONOMIES_PARAMETER );
+		$excluded_taxonomies = $request->has_param(
+			self::REST_EXCLUDED_TAXONOMIES_PARAMETER
+		) ? $request->get_param( self::REST_EXCLUDED_TAXONOMIES_PARAMETER ) : null;
 
 		return $this->apply_related_arguments(
 			$args,
 			absint( $request->get_param( self::REST_PARAMETER ) ),
-			is_array( $taxonomies ) ? $taxonomies : array()
+			is_array( $taxonomies ) ? $taxonomies : array(),
+			is_array( $excluded_taxonomies ) ? $excluded_taxonomies : null
 		);
 	}
 
 	/**
 	 * Applies the query constraints shared by frontend and editor requests.
 	 *
-	 * @param array<string, mixed> $query                Existing query arguments.
-	 * @param int                  $post_id              Source post ID.
-	 * @param array<int, string>   $selected_taxonomies Taxonomies used for matching.
+	 * @param array<string, mixed>    $query                 Existing query arguments.
+	 * @param int                     $post_id               Source post ID.
+	 * @param array<int, string>      $selected_taxonomies  Legacy taxonomies used for matching.
+	 * @param array<int, string>|null $excluded_taxonomies Taxonomies explicitly excluded from matching.
 	 * @return array<string, mixed>
 	 */
-	public function apply_related_arguments( $query, $post_id, $selected_taxonomies = array() ) {
+	public function apply_related_arguments(
+		$query,
+		$post_id,
+		$selected_taxonomies = array(),
+		$excluded_taxonomies = null
+	) {
 		$post = get_post( $post_id );
 
 		if ( ! $post ) {
@@ -188,12 +217,22 @@ final class Related_Query {
 		$selected_taxonomies = array_filter(
 			array_map( 'sanitize_key', $selected_taxonomies )
 		);
+		if ( is_array( $excluded_taxonomies ) ) {
+			$excluded_taxonomies = array_filter(
+				array_map( 'sanitize_key', $excluded_taxonomies )
+			);
+		}
 
 		foreach ( $taxonomies as $taxonomy ) {
 			if (
 				! is_taxonomy_viewable( $taxonomy )
 				|| (
-					! empty( $selected_taxonomies )
+					is_array( $excluded_taxonomies )
+					&& in_array( $taxonomy->name, $excluded_taxonomies, true )
+				)
+				|| (
+					! is_array( $excluded_taxonomies )
+					&& ! empty( $selected_taxonomies )
 					&& ! in_array( $taxonomy->name, $selected_taxonomies, true )
 				)
 			) {
