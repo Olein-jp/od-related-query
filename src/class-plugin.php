@@ -20,11 +20,13 @@ final class Plugin {
 	 * @return void
 	 */
 	public static function load() {
-		$editor_assets = new Editor_Assets();
-		$related_query = new Related_Query();
+		$editor_assets  = new Editor_Assets();
+		$plugin_updater = new Plugin_Updater();
+		$related_query  = new Related_Query();
 
 		add_action( 'init', array( self::class, 'load_textdomain' ) );
 		$editor_assets->register_hooks();
+		$plugin_updater->register();
 		$related_query->register_hooks();
 
 		/**
