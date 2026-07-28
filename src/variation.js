@@ -7,6 +7,32 @@ export const RELATED_EXCLUDED_TAXONOMIES_PARAMETER =
 	'od_related_taxonomies_excluded';
 
 /**
+ * Returns the post type whose taxonomies should be shown in the editor.
+ *
+ * A template is an editor entity rather than a content type. In that context,
+ * the Query Loop's selected target post type supplies the taxonomy candidates.
+ *
+ * @param {string|undefined} editorPostType Current editor entity post type.
+ * @param {string|undefined} queryPostType  Query Loop target post type.
+ * @return {string|undefined} Taxonomy source post type.
+ */
+export function getTaxonomySourcePostType( editorPostType, queryPostType ) {
+	if ( 'wp_template' === editorPostType ) {
+		return 'string' === typeof queryPostType &&
+			queryPostType &&
+			! queryPostType.startsWith( 'wp_' )
+			? queryPostType
+			: undefined;
+	}
+
+	return 'string' === typeof editorPostType &&
+		editorPostType &&
+		! editorPostType.startsWith( 'wp_' )
+		? editorPostType
+		: undefined;
+}
+
+/**
  * Returns the taxonomy slugs selected by the current query configuration.
  *
  * The excluded-taxonomies setting takes precedence. The older selected-

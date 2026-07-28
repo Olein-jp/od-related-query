@@ -1,7 +1,12 @@
 import { registerBlockVariation } from '@wordpress/blocks';
 import { InspectorControls } from '@wordpress/block-editor';
 import { createHigherOrderComponent } from '@wordpress/compose';
-import { CheckboxControl, Notice, PanelBody } from '@wordpress/components';
+import {
+	CheckboxControl,
+	Notice,
+	PanelBody,
+	Spinner,
+} from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
 import { createElement, Fragment, useEffect } from '@wordpress/element';
 import { addFilter } from '@wordpress/hooks';
@@ -10,6 +15,7 @@ import { __ } from '@wordpress/i18n';
 import {
 	getExcludedTaxonomySlugs,
 	getSelectedTaxonomySlugs,
+	getTaxonomySourcePostType,
 	RELATED_EXCLUDED_TAXONOMIES_PARAMETER,
 	RELATED_POST_PARAMETER,
 	RELATED_QUERY_VARIATION,
@@ -24,29 +30,55 @@ function RelatedQueryBlockEdit( { BlockEdit, ...props } ) {
 	const { query = {} } = attributes;
 	const editorContext = useSelect( ( select ) => {
 		const editor = select( 'core/editor' );
-		const core = select( 'core' );
-		const postType = editor?.getCurrentPostType();
 
 		return {
 			postId: editor?.getCurrentPostId(),
-			postType,
-			taxonomies:
-				'string' === typeof postType
-					? core?.getTaxonomies( {
-							type: postType,
-							per_page: -1,
-					  } )
-					: [],
+			postType: editor?.getCurrentPostType(),
 		};
 	}, [] );
+	const taxonomySourcePostType = getTaxonomySourcePostType(
+		editorContext.postType,
+		query.postType
+	);
+	const taxonomyContext = useSelect(
+		( select ) => {
+			if ( ! taxonomySourcePostType ) {
+				return {
+					error: null,
+					isLoading: false,
+					taxonomies: [],
+				};
+			}
+
+			const core = select( 'core' );
+			const taxonomyQuery = {
+				type: taxonomySourcePostType,
+				per_page: -1,
+			};
+			const resolutionArgs = [ taxonomyQuery ];
+
+			return {
+				error: core.getResolutionError(
+					'getTaxonomies',
+					resolutionArgs
+				),
+				isLoading: ! core.hasFinishedResolution(
+					'getTaxonomies',
+					resolutionArgs
+				),
+				taxonomies: core.getTaxonomies( taxonomyQuery ),
+			};
+		},
+		[ taxonomySourcePostType ]
+	);
 	const sourcePostId = Number( editorContext.postId );
 	const hasUsablePostContext =
 		Number.isInteger( sourcePostId ) &&
 		0 < sourcePostId &&
 		'string' === typeof editorContext.postType &&
 		! editorContext.postType.startsWith( 'wp_' );
-	const availableTaxonomies = Array.isArray( editorContext.taxonomies )
-		? editorContext.taxonomies.filter(
+	const availableTaxonomies = Array.isArray( taxonomyContext.taxonomies )
+		? taxonomyContext.taxonomies.filter(
 				( taxonomy ) => false !== taxonomy.visibility?.public
 		  )
 		: [];
@@ -129,15 +161,66 @@ function RelatedQueryBlockEdit( { BlockEdit, ...props } ) {
 						'od-related-query'
 					)
 				),
-				...availableTaxonomies.map( ( taxonomy ) =>
-					createElement( CheckboxControl, {
-						key: taxonomy.slug,
-						label: taxonomy.name,
-						checked: selectedTaxonomies.includes( taxonomy.slug ),
-						onChange: ( isSelected ) =>
-							setTaxonomySelected( taxonomy.slug, isSelected ),
-					} )
-				),
+				taxonomyContext.isLoading &&
+					createElement(
+						'p',
+						{
+							'aria-live': 'polite',
+						},
+						createElement( Spinner ),
+						__(
+							'Loading available taxonomies…',
+							'od-related-query'
+						)
+					),
+				! taxonomyContext.isLoading &&
+					taxonomyContext.error &&
+					createElement(
+						Notice,
+						{
+							status: 'error',
+							isDismissible: false,
+						},
+						__(
+							'The available taxonomies could not be loaded.',
+							'od-related-query'
+						)
+					),
+				! taxonomyContext.isLoading &&
+					! taxonomyContext.error &&
+					0 === availableTaxonomies.length &&
+					createElement(
+						Notice,
+						{
+							status: 'info',
+							isDismissible: false,
+						},
+						taxonomySourcePostType
+							? __(
+									'No public taxonomies are available for the selected post type.',
+									'od-related-query'
+							  )
+							: __(
+									'Select a post type in the Query settings to load its taxonomies.',
+									'od-related-query'
+							  )
+					),
+				! taxonomyContext.isLoading &&
+					! taxonomyContext.error &&
+					availableTaxonomies.map( ( taxonomy ) =>
+						createElement( CheckboxControl, {
+							key: taxonomy.slug,
+							label: taxonomy.name,
+							checked: selectedTaxonomies.includes(
+								taxonomy.slug
+							),
+							onChange: ( isSelected ) =>
+								setTaxonomySelected(
+									taxonomy.slug,
+									isSelected
+								),
+						} )
+					),
 				0 < availableTaxonomies.length &&
 					0 === selectedTaxonomies.length &&
 					createElement(

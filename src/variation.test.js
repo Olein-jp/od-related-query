@@ -1,6 +1,7 @@
 import {
 	getExcludedTaxonomySlugs,
 	getSelectedTaxonomySlugs,
+	getTaxonomySourcePostType,
 	RELATED_EXCLUDED_TAXONOMIES_PARAMETER,
 	RELATED_POST_PARAMETER,
 	RELATED_QUERY_VARIATION,
@@ -94,5 +95,25 @@ describe( 'related Query Loop variation', () => {
 		expect(
 			getExcludedTaxonomySlugs( taxonomies, [ 'category' ] )
 		).toEqual( [ 'post_tag', 'topic' ] );
+	} );
+
+	it( 'uses the edited post type in the post editor', () => {
+		expect( getTaxonomySourcePostType( 'book', 'post' ) ).toBe( 'book' );
+	} );
+
+	it( 'uses the Query Loop post type in the template editor', () => {
+		expect( getTaxonomySourcePostType( 'wp_template', 'post' ) ).toBe(
+			'post'
+		);
+		expect( getTaxonomySourcePostType( 'wp_template', 'book' ) ).toBe(
+			'book'
+		);
+	} );
+
+	it( 'does not use internal editor entities as taxonomy sources', () => {
+		expect( getTaxonomySourcePostType( 'wp_template' ) ).toBeUndefined();
+		expect(
+			getTaxonomySourcePostType( 'wp_template', 'wp_template' )
+		).toBeUndefined();
 	} );
 } );
