@@ -5,6 +5,7 @@ import {
 	CheckboxControl,
 	Notice,
 	PanelBody,
+	SelectControl,
 	Spinner,
 } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
@@ -14,10 +15,12 @@ import { __ } from '@wordpress/i18n';
 
 import {
 	getExcludedTaxonomySlugs,
+	getPreviewSourcePostId,
 	getSelectedTaxonomySlugs,
 	getTaxonomySourcePostType,
 	RELATED_EXCLUDED_TAXONOMIES_PARAMETER,
 	RELATED_POST_PARAMETER,
+	RELATED_PREVIEW_POST_PARAMETER,
 	RELATED_QUERY_VARIATION,
 	RELATED_TAXONOMIES_PARAMETER,
 	VARIATION_NAMESPACE,
@@ -40,6 +43,7 @@ function RelatedQueryBlockEdit( { BlockEdit, ...props } ) {
 		editorContext.postType,
 		query.postType
 	);
+	const isTemplateEditor = 'wp_template' === editorContext.postType;
 	const taxonomyContext = useSelect(
 		( select ) => {
 			if ( ! taxonomySourcePostType ) {
@@ -70,6 +74,49 @@ function RelatedQueryBlockEdit( { BlockEdit, ...props } ) {
 			};
 		},
 		[ taxonomySourcePostType ]
+	);
+	const previewSourceContext = useSelect(
+		( select ) => {
+			if ( ! isTemplateEditor || ! taxonomySourcePostType ) {
+				return {
+					error: null,
+					isLoading: false,
+					posts: [],
+				};
+			}
+
+			const core = select( 'core' );
+			const postsQuery = {
+				per_page: 20,
+				status: 'publish',
+				order: 'desc',
+				orderby: 'date',
+				_fields: [ 'id', 'title' ],
+			};
+			const resolutionArgs = [
+				'postType',
+				taxonomySourcePostType,
+				postsQuery,
+			];
+
+			return {
+				error: core.getResolutionError(
+					'getEntityRecords',
+					resolutionArgs
+				),
+				isLoading: ! core.hasFinishedResolution(
+					'getEntityRecords',
+					resolutionArgs
+				),
+				posts:
+					core.getEntityRecords(
+						'postType',
+						taxonomySourcePostType,
+						postsQuery
+					) || [],
+			};
+		},
+		[ isTemplateEditor, taxonomySourcePostType ]
 	);
 	const sourcePostId = Number( editorContext.postId );
 	const hasUsablePostContext =
@@ -121,6 +168,48 @@ function RelatedQueryBlockEdit( { BlockEdit, ...props } ) {
 		sourcePostId,
 	] );
 
+	useEffect( () => {
+		if (
+			! isTemplateEditor ||
+			previewSourceContext.isLoading ||
+			previewSourceContext.error
+		) {
+			return;
+		}
+
+		const previewPostId = getPreviewSourcePostId(
+			previewSourceContext.posts,
+			query[ RELATED_PREVIEW_POST_PARAMETER ]
+		);
+
+		if ( previewPostId === query[ RELATED_PREVIEW_POST_PARAMETER ] ) {
+			return;
+		}
+
+		setAttributes( {
+			query: {
+				...query,
+				[ RELATED_PREVIEW_POST_PARAMETER ]: previewPostId,
+			},
+		} );
+	}, [
+		isTemplateEditor,
+		previewSourceContext.error,
+		previewSourceContext.isLoading,
+		previewSourceContext.posts,
+		query,
+		setAttributes,
+	] );
+
+	const setPreviewSourcePost = ( previewPostId ) => {
+		setAttributes( {
+			query: {
+				...query,
+				[ RELATED_PREVIEW_POST_PARAMETER ]: Number( previewPostId ),
+			},
+		} );
+	};
+
 	const setTaxonomySelected = ( taxonomySlug, isSelected ) => {
 		const nextTaxonomies = isSelected
 			? [ ...selectedTaxonomies, taxonomySlug ]
@@ -161,6 +250,73 @@ function RelatedQueryBlockEdit( { BlockEdit, ...props } ) {
 						'od-related-query'
 					)
 				),
+				isTemplateEditor &&
+					previewSourceContext.isLoading &&
+					createElement(
+						'p',
+						{
+							'aria-live': 'polite',
+						},
+						createElement( Spinner ),
+						__(
+							'Loading preview source posts…',
+							'od-related-query'
+						)
+					),
+				isTemplateEditor &&
+					! previewSourceContext.isLoading &&
+					previewSourceContext.error &&
+					createElement(
+						Notice,
+						{
+							status: 'error',
+							isDismissible: false,
+						},
+						__(
+							'Preview source posts could not be loaded.',
+							'od-related-query'
+						)
+					),
+				isTemplateEditor &&
+					! previewSourceContext.isLoading &&
+					! previewSourceContext.error &&
+					0 === previewSourceContext.posts.length &&
+					createElement(
+						Notice,
+						{
+							status: 'warning',
+							isDismissible: false,
+						},
+						__(
+							'No published posts are available for this post type. Publish a post to preview related content in the template editor.',
+							'od-related-query'
+						)
+					),
+				isTemplateEditor &&
+					! previewSourceContext.isLoading &&
+					! previewSourceContext.error &&
+					0 < previewSourceContext.posts.length &&
+					createElement( SelectControl, {
+						label: __( 'Preview source post', 'od-related-query' ),
+						help: __(
+							'Used only for the template editor preview. The frontend always uses the post being viewed.',
+							'od-related-query'
+						),
+						value: String(
+							getPreviewSourcePostId(
+								previewSourceContext.posts,
+								query[ RELATED_PREVIEW_POST_PARAMETER ]
+							)
+						),
+						options: previewSourceContext.posts.map( ( post ) => ( {
+							label:
+								post.title?.rendered ||
+								post.title?.raw ||
+								__( '(Untitled)', 'od-related-query' ),
+							value: String( post.id ),
+						} ) ),
+						onChange: setPreviewSourcePost,
+					} ),
 				taxonomyContext.isLoading &&
 					createElement(
 						'p',

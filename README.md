@@ -22,6 +22,11 @@ update when that selection changes. Newly available public taxonomies are
 selected automatically unless explicitly excluded. Leaving every relationship
 taxonomy unchecked returns no related content.
 
+In the template editor, the newest published post for the selected post type is
+chosen automatically as the preview source. A different published post can be
+selected in the Related Content panel. This setting affects only the editor's
+REST preview; on the frontend, the currently displayed post is always used.
+
 ## Development
 
 ```sh
@@ -62,7 +67,5 @@ npm run env:test:stop
 
 - Matching uses an `OR` relationship across the selected taxonomies.
 - Results are ordered by date; relevance scoring is not included.
-- A template editor has no concrete source post, so its canvas shows the
-  no-results state. The frontend resolves the currently displayed post.
 - Editing an individual post supplies its post ID to the REST API for an
   accurate editor preview.

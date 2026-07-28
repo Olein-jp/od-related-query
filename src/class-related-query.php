@@ -32,6 +32,13 @@ final class Related_Query {
 	const REST_PARAMETER = 'od_related_to';
 
 	/**
+	 * REST API parameter used as the template editor preview source.
+	 *
+	 * @var string
+	 */
+	const REST_PREVIEW_PARAMETER = 'od_related_preview_to';
+
+	/**
 	 * REST API parameter used to limit relationship taxonomies.
 	 *
 	 * @var string
@@ -130,6 +137,12 @@ final class Related_Query {
 			'minimum'           => 0,
 			'sanitize_callback' => 'absint',
 		);
+		$query_params[ self::REST_PREVIEW_PARAMETER ]             = array(
+			'description'       => __( 'Post ID used only as the template editor preview source.', 'od-related-query' ),
+			'type'              => 'integer',
+			'minimum'           => 0,
+			'sanitize_callback' => 'absint',
+		);
 		$query_params[ self::REST_TAXONOMIES_PARAMETER ]          = array(
 			'description' => __( 'Taxonomies used to determine related content.', 'od-related-query' ),
 			'type'        => 'array',
@@ -160,6 +173,8 @@ final class Related_Query {
 			return $args;
 		}
 
+		$post_id             = absint( $request->get_param( self::REST_PARAMETER ) );
+		$preview_post_id     = absint( $request->get_param( self::REST_PREVIEW_PARAMETER ) );
 		$taxonomies          = $request->get_param( self::REST_TAXONOMIES_PARAMETER );
 		$excluded_taxonomies = $request->has_param(
 			self::REST_EXCLUDED_TAXONOMIES_PARAMETER
@@ -167,7 +182,7 @@ final class Related_Query {
 
 		return $this->apply_related_arguments(
 			$args,
-			absint( $request->get_param( self::REST_PARAMETER ) ),
+			$post_id ? $post_id : $preview_post_id,
 			is_array( $taxonomies ) ? $taxonomies : array(),
 			is_array( $excluded_taxonomies ) ? $excluded_taxonomies : null
 		);

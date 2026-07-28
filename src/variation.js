@@ -2,6 +2,7 @@ import { __ } from '@wordpress/i18n';
 
 export const VARIATION_NAMESPACE = 'od-related-query/related';
 export const RELATED_POST_PARAMETER = 'od_related_to';
+export const RELATED_PREVIEW_POST_PARAMETER = 'od_related_preview_to';
 export const RELATED_TAXONOMIES_PARAMETER = 'od_related_taxonomies';
 export const RELATED_EXCLUDED_TAXONOMIES_PARAMETER =
 	'od_related_taxonomies_excluded';
@@ -30,6 +31,24 @@ export function getTaxonomySourcePostType( editorPostType, queryPostType ) {
 		! editorPostType.startsWith( 'wp_' )
 		? editorPostType
 		: undefined;
+}
+
+/**
+ * Returns a valid preview source ID, falling back to the first available post.
+ *
+ * @param {Array}      posts         Available preview source posts.
+ * @param {number|any} currentPostId Currently selected preview source ID.
+ * @return {number} Preview source post ID, or zero when no source is available.
+ */
+export function getPreviewSourcePostId( posts, currentPostId ) {
+	const postIds = posts
+		.map( ( post ) => Number( post.id ) )
+		.filter( ( postId ) => Number.isInteger( postId ) && 0 < postId );
+	const normalizedCurrentPostId = Number( currentPostId );
+
+	return postIds.includes( normalizedCurrentPostId )
+		? normalizedCurrentPostId
+		: postIds[ 0 ] || 0;
 }
 
 /**

@@ -1,5 +1,6 @@
 import {
 	getExcludedTaxonomySlugs,
+	getPreviewSourcePostId,
 	getSelectedTaxonomySlugs,
 	getTaxonomySourcePostType,
 	RELATED_EXCLUDED_TAXONOMIES_PARAMETER,
@@ -115,5 +116,18 @@ describe( 'related Query Loop variation', () => {
 		expect(
 			getTaxonomySourcePostType( 'wp_template', 'wp_template' )
 		).toBeUndefined();
+	} );
+
+	it( 'keeps an available template preview source selected', () => {
+		const posts = [ { id: 12 }, { id: 34 } ];
+
+		expect( getPreviewSourcePostId( posts, 34 ) ).toBe( 34 );
+	} );
+
+	it( 'automatically selects a valid template preview source', () => {
+		expect( getPreviewSourcePostId( [ { id: 12 }, { id: 34 } ], 99 ) ).toBe(
+			12
+		);
+		expect( getPreviewSourcePostId( [], 99 ) ).toBe( 0 );
 	} );
 } );

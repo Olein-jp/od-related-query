@@ -334,13 +334,14 @@ class Related_Query_Test extends WP_UnitTestCase {
 		);
 		$source_id   = self::factory()->post->create();
 		$match_id    = self::factory()->post->create();
-		self::factory()->post->create();
+		$preview_id  = self::factory()->post->create();
 
 		wp_set_post_terms( $source_id, array( $category_id ), 'category' );
 		wp_set_post_terms( $match_id, array( $category_id ), 'category' );
 
 		$request = new WP_REST_Request( 'GET', '/wp/v2/posts' );
 		$request->set_param( Related_Query::REST_PARAMETER, $source_id );
+		$request->set_param( Related_Query::REST_PREVIEW_PARAMETER, $preview_id );
 		$request->set_param(
 			Related_Query::REST_TAXONOMIES_PARAMETER,
 			array( 'category' )
@@ -353,5 +354,94 @@ class Related_Query_Test extends WP_UnitTestCase {
 		$this->assertSame( 200, $response->get_status() );
 		$this->assertIsArray( $data );
 		$this->assertSame( array( $match_id ), wp_list_pluck( $data, 'id' ) );
+	}
+
+	/**
+	 * REST previews can use a template-editor-specific source post.
+	 *
+	 * @return void
+	 */
+	public function test_rest_query_uses_template_preview_source_parameter() {
+		$category_id = self::factory()->term->create(
+			array(
+				'taxonomy' => 'category',
+			)
+		);
+		$source_id   = self::factory()->post->create();
+		$match_id    = self::factory()->post->create();
+		self::factory()->post->create();
+
+		wp_set_post_terms( $source_id, array( $category_id ), 'category' );
+		wp_set_post_terms( $match_id, array( $category_id ), 'category' );
+
+		$request = new WP_REST_Request( 'GET', '/wp/v2/posts' );
+		$request->set_param( Related_Query::REST_PARAMETER, 0 );
+		$request->set_param( Related_Query::REST_PREVIEW_PARAMETER, $source_id );
+		$request->set_param( 'per_page', 10 );
+
+		$response = rest_do_request( $request );
+		$data     = $response->get_data();
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertIsArray( $data );
+		$this->assertSame( array( $match_id ), wp_list_pluck( $data, 'id' ) );
+	}
+
+	/**
+	 * A saved template preview source never replaces the frontend source post.
+	 *
+	 * @return void
+	 */
+	public function test_frontend_ignores_template_preview_source_parameter() {
+		$current_category_id = self::factory()->term->create(
+			array(
+				'taxonomy' => 'category',
+			)
+		);
+		$preview_category_id = self::factory()->term->create(
+			array(
+				'taxonomy' => 'category',
+			)
+		);
+		$current_id          = self::factory()->post->create();
+		$current_match_id    = self::factory()->post->create();
+		$preview_id          = self::factory()->post->create();
+		$preview_match_id    = self::factory()->post->create();
+
+		wp_set_post_terms( $current_id, array( $current_category_id ), 'category' );
+		wp_set_post_terms( $current_match_id, array( $current_category_id ), 'category' );
+		wp_set_post_terms( $preview_id, array( $preview_category_id ), 'category' );
+		wp_set_post_terms( $preview_match_id, array( $preview_category_id ), 'category' );
+
+		$this->go_to( get_permalink( $current_id ) );
+
+		$block = new WP_Block(
+			array(
+				'blockName'   => 'core/post-template',
+				'attrs'       => array(),
+				'innerBlocks' => array(),
+			),
+			array(
+				'query' => array(
+					Related_Query::REST_PARAMETER         => 0,
+					Related_Query::REST_PREVIEW_PARAMETER => $preview_id,
+				),
+			)
+		);
+		$args  = apply_filters(
+			'query_loop_block_query_vars',
+			array(
+				'post_type'      => 'post',
+				'posts_per_page' => 10,
+				'fields'         => 'ids',
+			),
+			$block,
+			1
+		);
+		$ids   = get_posts( $args );
+
+		$this->assertContains( $current_match_id, $ids );
+		$this->assertNotContains( $preview_match_id, $ids );
+		$this->assertNotContains( $current_id, $ids );
 	}
 }
