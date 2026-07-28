@@ -27,6 +27,19 @@ chosen automatically as the preview source. A different published post can be
 selected in the Related Content panel. This setting affects only the editor's
 REST preview; on the frontend, the currently displayed post is always used.
 
+## Requirements
+
+- WordPress 6.6 or later (tested up to WordPress 7.0)
+- PHP 7.4 or later
+- The WordPress block editor and the Core Query Loop block
+- A block theme when placing Related Content in a Site Editor template
+- Outbound HTTPS access to GitHub for automatic update checks
+
+A block theme is not required when using the variation in the post editor. The
+release ZIP includes all required PHP dependencies, so Composer and Node.js are
+not required on the WordPress server. If GitHub cannot be reached, update checks
+fail safely and the related-content functionality continues to work.
+
 ## Development
 
 ```sh
@@ -79,6 +92,7 @@ plugin version constant, and `RELEASE_VERSION` do not match. Pushing a matching
 ## Current limitations
 
 - Matching uses an `OR` relationship across the selected taxonomies.
-- Results are ordered by date; relevance scoring is not included.
+- Relevance ordering counts shared terms equally and does not apply a separate
+  weight to each taxonomy.
 - Editing an individual post supplies its post ID to the REST API for an
   accurate editor preview.
