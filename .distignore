@@ -1,5 +1,6 @@
 /.git
 /.github
+/.distignore
 /.editorconfig
 /.gitignore
 /.wp-env.json
@@ -20,3 +21,4 @@
 /src/*.js
 /tests
 /*.log
+/*.zip

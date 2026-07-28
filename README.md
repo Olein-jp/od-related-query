@@ -63,6 +63,19 @@ npm run test:php
 npm run env:test:stop
 ```
 
+## Release
+
+Create and verify an installable release ZIP:
+
+```sh
+npm run release:build
+npm run release:test
+```
+
+The build fails when the version in `package.json`, the plugin header, the
+plugin version constant, and `RELEASE_VERSION` do not match. Pushing a matching
+`v*` tag builds and tests the ZIP before attaching it to a GitHub Release.
+
 ## Current limitations
 
 - Matching uses an `OR` relationship across the selected taxonomies.

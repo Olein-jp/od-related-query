@@ -7,3 +7,4 @@
 /.wp-env.test.override.json
 .DS_Store
 *.log
+/*.zip
