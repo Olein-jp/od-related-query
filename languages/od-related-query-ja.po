@@ -1,6 +1,6 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: OD Related Query 0.1.0\n"
+"Project-Id-Version: OD Related Query 0.1.1\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/od-related-query\n"
 "Last-Translator: Olein\n"
 "Language-Team: Japanese\n"

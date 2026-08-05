@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       OD Related Query
  * Description:       Adds a related-content variation to the Query Loop block.
- * Version:           0.1.0
+ * Version:           0.1.1
  * Requires at least: 6.6
  * Requires PHP:      7.4
  * Tested up to:      7.0
@@ -21,7 +21,7 @@ namespace OD_Related_Query;
 defined( 'ABSPATH' ) || exit;
 
 define( 'OD_RELATED_QUERY_FILE', __FILE__ );
-define( 'OD_RELATED_QUERY_VERSION', '0.1.0' );
+define( 'OD_RELATED_QUERY_VERSION', '0.1.1' );
 
 $od_related_query_autoloader = __DIR__ . '/vendor/autoload.php';
 

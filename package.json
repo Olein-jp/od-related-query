@@ -1,6 +1,6 @@
 {
 	"name": "od-related-query",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"private": true,
 	"description": "Development tooling for the OD Related Query WordPress plugin.",
 	"license": "GPL-2.0-or-later",
